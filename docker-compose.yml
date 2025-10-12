@@ -1,0 +1,89 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: orthanc_db
+      POSTGRES_USER: orthanc_user
+      POSTGRES_PASSWORD: orthanc_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orthanc_user -d orthanc_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  orthanc:
+    image: orthancteam/orthanc:22.12.1
+    container_name: orthanc
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      VERBOSE_STARTUP: true
+      DICOM_WEB_PLUGIN_ENABLED: true
+      ORTHANC__RemoteAccessAllowed: true
+      ORTHANC__HttpServer__EnableCors: true
+
+      ORTHANC__DicomWeb__Enable: true
+      ORTHANC__DicomWeb__EnableWado: true
+      ORTHANC__DicomWeb__EnableStow: true
+      ORTHANC__DicomWeb__EnableQido: true
+      ORTHANC__DicomWeb__Root: /dicom-web/
+      ORTHANC__DicomWeb__Ssl: false
+
+      # Identidad básica del servidor Orthanc
+      ORTHANC__NAME: OrthancServer
+      ORTHANC__AUTHENTICATION_ENABLED: true
+      ORTHANC__REGISTERED_USERS: |
+        {
+          "orthanc": "orthanc"
+        }
+
+      # Configuración de conexión DICOM
+      ORTHANC__DICOM_AET: ORTHANC
+      ORTHANC__DICOM_PORT: 4242
+
+      # 🔌 Activar plugin de PostgreSQL
+      POSTGRESQL_PLUGIN_ENABLED: true
+
+      # Configuración del plugin PostgreSQL
+      ORTHANC__POSTGRESQL__ENABLEINDEX: true
+      ORTHANC__POSTGRESQL__ENABLESTORAGE: true
+      ORTHANC__POSTGRESQL__HOST: postgres
+      ORTHANC__POSTGRESQL__PORT: 5432
+      ORTHANC__POSTGRESQL__DATABASE: orthanc_db
+      ORTHANC__POSTGRESQL__USERNAME: orthanc_user
+      ORTHANC__POSTGRESQL__PASSWORD: orthanc_pass
+
+      # ⚙️ Opcional: habilitar Orthanc Explorer 2 (UI moderna)
+      ORTHANC_EXPLORER_2_ENABLED: true
+
+    ports:
+      - "8042:8042"   # Web UI
+      - "4242:4242"   # Puerto DICOM
+    volumes:
+      - orthanc_data:/var/lib/orthanc/db
+  ohif:
+    image: ohif/viewer:latest
+    container_name: ohif
+    restart: always
+    depends_on:
+      - orthanc
+    ports:
+      - "3000:80"
+    environment:
+      # URL pública del visor
+      PUBLIC_URL: "/"
+      APP_CONFIG_URL: "/config/OhifConfig.js"
+    volumes:
+      - ./config/ohif:/usr/share/nginx/html/config
+
+volumes:
+  postgres_data:
+  orthanc_data:
