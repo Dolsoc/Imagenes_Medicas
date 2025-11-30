@@ -1,0 +1,39 @@
+# Docker Compose file WITHOUT persistent volumes (for testing/CI)
+# Based on: https://github.com/openmrs/openmrs-distro-referenceapplication/blob/main/docker-compose-no-volumes.yml
+#
+# This provides a minimal OpenMRS setup without data persistence
+# Useful for quick testing and CI/CD pipelines
+
+services:
+  backend:
+    image: openmrs/openmrs-reference-application-3-backend:${TAG:-qa}
+    depends_on:
+      - db
+    environment:
+      OMRS_CONFIG_MODULE_WEB_ADMIN: "true"
+      OMRS_CONFIG_AUTO_UPDATE_DATABASE: "true"
+      OMRS_CONFIG_CREATE_TABLES: "true"
+      OMRS_CONFIG_CONNECTION_SERVER: db
+      OMRS_CONFIG_CONNECTION_DATABASE: openmrs
+      OMRS_CONFIG_CONNECTION_USERNAME: ${OPENMRS_DB_USER:-openmrs}
+      OMRS_CONFIG_CONNECTION_PASSWORD: ${MYSQL_OPENMRS_PASSWORD}
+      OMRS_OCL_TOKEN: ${OMRS_OCL_TOKEN}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/openmrs" ]
+      timeout: 5s
+    ports:
+      - "8080:8080"
+
+  db:
+    image: mariadb:10.11.7
+    command: "mariadbd --character-set-server=utf8mb4 --collation-server=utf8mb4_bin"
+    environment:
+      MYSQL_DATABASE: openmrs
+      MYSQL_USER: ${OPENMRS_DB_USER:-openmrs}
+      MYSQL_PASSWORD: ${MYSQL_OPENMRS_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "mysql --user=${OPENMRS_DB_USER:-openmrs} --password=${MYSQL_OPENMRS_PASSWORD} --execute 'SHOW DATABASES;'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5

@@ -1,0 +1,53 @@
+// Minimal Grafana Alloy configuration (fixed syntax)
+
+logging {
+  level = "info"
+  format = "logfmt"
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+    batch_wait = "1s"
+    batch_size = "1MB"
+  }
+}
+
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+  refresh_interval = "5s"
+}
+
+loki.source.docker "docker_logs" {
+  host = "unix:///var/run/docker.sock"
+  targets = discovery.docker.containers.targets
+
+  forward_to = [loki.process.docker_pipeline.receiver]
+
+  labels = {
+    job = "docker",
+  }
+}
+
+loki.process "docker_pipeline" {
+  forward_to = [loki.write.default.receiver]
+
+  stage.docker {}
+
+  stage.regex {
+    expression = "(?P<level>ERROR|WARN|INFO|DEBUG|TRACE)"
+  }
+
+  stage.labels {
+    values = {
+      level = "level",
+    }
+  }
+
+  stage.static_labels {
+    values = {
+      environment = "production",
+      application = "peruhce",
+    }
+  }
+}

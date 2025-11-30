@@ -1,0 +1,141 @@
+{
+    "realm": "openmrs",
+    "enabled": true,
+    "sslRequired": "external",
+    "registrationAllowed": false,
+    "loginWithEmailAllowed": true,
+    "duplicateEmailsAllowed": false,
+    "resetPasswordAllowed": true,
+    "editUsernameAllowed": false,
+    "bruteForceProtected": true,
+    "permanentLockout": false,
+    "maxFailureWaitSeconds": 900,
+    "minimumQuickLoginWaitSeconds": 60,
+    "waitIncrementSeconds": 60,
+    "quickLoginCheckMilliSeconds": 1000,
+    "maxDeltaTimeSeconds": 43200,
+    "failureFactor": 30,
+    "roles": {
+        "realm": [
+            {
+                "name": "System Developer",
+                "description": "Developer role for system administration"
+            },
+            {
+                "name": "Provider",
+                "description": "Healthcare provider role"
+            },
+            {
+                "name": "Clerk",
+                "description": "Data entry clerk role"
+            }
+        ]
+    },
+    "clients": [
+        {
+            "clientId": "openmrs",
+            "name": "OpenMRS",
+            "enabled": true,
+            "clientAuthenticatorType": "client-secret",
+            "secret": "${KEYCLOAK_CLIENT_SECRET}",
+            "redirectUris": [
+                "http://localhost/openmrs/*",
+                "http://localhost:8080/openmrs/*",
+                "http://localhost/openmrs/spa/*",
+                "https://localhost/openmrs/*",
+                "https://localhost:8080/openmrs/*"
+            ],
+            "webOrigins": [
+                "http://localhost",
+                "http://localhost:8080",
+                "https://localhost",
+                "https://localhost:8080",
+                "+"
+            ],
+            "standardFlowEnabled": true,
+            "implicitFlowEnabled": false,
+            "directAccessGrantsEnabled": true,
+            "serviceAccountsEnabled": false,
+            "publicClient": false,
+            "frontchannelLogout": true,
+            "protocol": "openid-connect",
+            "attributes": {
+                "exclude.session.state.from.auth.response": "false",
+                "tls.client.certificate.bound.access.tokens": "false"
+            },
+            "protocolMappers": [
+                {
+                    "name": "username",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-usermodel-property-mapper",
+                    "config": {
+                        "userinfo.token.claim": "true",
+                        "user.attribute": "username",
+                        "id.token.claim": "true",
+                        "access.token.claim": "true",
+                        "claim.name": "preferred_username",
+                        "jsonType.label": "String"
+                    }
+                },
+                {
+                    "name": "given name",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-usermodel-property-mapper",
+                    "config": {
+                        "userinfo.token.claim": "true",
+                        "user.attribute": "firstName",
+                        "id.token.claim": "true",
+                        "access.token.claim": "true",
+                        "claim.name": "given_name",
+                        "jsonType.label": "String"
+                    }
+                },
+                {
+                    "name": "family name",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-usermodel-property-mapper",
+                    "config": {
+                        "userinfo.token.claim": "true",
+                        "user.attribute": "lastName",
+                        "id.token.claim": "true",
+                        "access.token.claim": "true",
+                        "claim.name": "family_name",
+                        "jsonType.label": "String"
+                    }
+                },
+                {
+                    "name": "email",
+                    "protocol": "openid-connect",
+                    "protocolMapper": "oidc-usermodel-property-mapper",
+                    "config": {
+                        "userinfo.token.claim": "true",
+                        "user.attribute": "email",
+                        "id.token.claim": "true",
+                        "access.token.claim": "true",
+                        "claim.name": "email",
+                        "jsonType.label": "String"
+                    }
+                }
+            ]
+        }
+    ],
+    "users": [
+        {
+            "username": "admin",
+            "enabled": true,
+            "firstName": "Super",
+            "lastName": "User",
+            "email": "admin@openmrs.org",
+            "credentials": [
+                {
+                    "type": "password",
+                    "value": "${KEYCLOAK_ADMIN_PASSWORD}",
+                    "temporary": true
+                }
+            ],
+            "realmRoles": [
+                "System Developer"
+            ]
+        }
+    ]
+}
