@@ -103,3 +103,26 @@ volumes:
   db-data: ~
   db-backup: ~
   gateway-data: ~
+  orthanc-data:
+    name: peruHCE-orthanc-data
+
+networks:
+  backend-network: 
+    name: peruHCE-backend-network
+    driver: bridge
+
+  dicom-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.24.0.0/24
+
+  services-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.27.0.0/24
+
+  frontend-network:
+    name: peruHCE-frontend-network
+    driver: bridge

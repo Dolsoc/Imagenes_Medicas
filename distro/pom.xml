@@ -60,6 +60,7 @@
     <appframework.version>2.18.0</appframework.version>
     <uiframework.version>4.0.0</uiframework.version>
     <uicommons.version>2.26.0</uicommons.version>
+    <imaging.version>1.1.5-SNAPSHOT</imaging.version>
     <!-- Content Packages -->
     <!-- <datafilter.version>2.2.0</datafilter.version> -->
     <!-- <oauth2login.version>1.6.0</oauth2login.version> -->

@@ -87,31 +87,31 @@ services:
       - services-network
       - backend-network
 
-volumes:
-  orthanc-data:
-    name: peruHCE-orthanc-data
+#volumes:
+#  orthanc-data:
+#    name: peruHCE-orthanc-data
 
-networks:
+#networks:
   # Red médica - DICOM/Orthanc/OHIF
-  dicom-network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.24.0.0/24
+#  dicom-network:
+#    driver: bridge
+#    ipam:
+#      config:
+#        - subnet: 172.24.0.0/24
 
   # Red de servicios - Para comunicación inter-servicios
-  services-network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.27.0.0/24
+#  services-network:
+#    driver: bridge
+#    ipam:
+#      config:
+#        - subnet: 172.27.0.0/24
 
   # Red pública - Para OHIF viewer
-  frontend-network:
-    external: true
-    name: peruHCE_frontend-network
+#  frontend-network:
+#    external: true
+#    name: peruHCE-frontend
 
   # Red de aplicación - Para integración con backend
-  backend-network:
-    external: true
-    name: peruHCE_backend-network
+#  backend-network:
+#    external: true
+#    name: peruHCE-backend
