@@ -647,8 +647,9 @@ function patchIndexHtml() {
   const swPath = path.join(outDir, 'service-worker.js');
   if (fs.existsSync(swPath)) {
     let sw = fs.readFileSync(swPath, 'utf8');
-    if (importmapUrl && spaPath) {
-      sw = sw.replace(/(['"])(?:\$\{SPA_PATH\}|\$SPA_PATH)\/importmap\.json\1/g, `$1${importmapUrl}$1`);
+    if (resolvedImportmapUrl && spaPath) {
+      sw = sw.replace(/(['"])https?:\/\/[^'"]*\/importmap\.json\1/g, `$1${resolvedImportmapUrl}$1`);
+      sw = sw.replace(/(['"])(?:\$\{SPA_PATH\}|\$SPA_PATH)\/importmap\.json\1/g, `$1${resolvedImportmapUrl}$1`);
     }
     fs.writeFileSync(swPath, envsubst(sw));
     logInfo('OK service-worker.js patched');
