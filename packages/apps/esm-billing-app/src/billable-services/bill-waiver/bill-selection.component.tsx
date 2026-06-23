@@ -1,0 +1,79 @@
+import {
+  Checkbox,
+  Layer,
+  StructuredListBody,
+  StructuredListCell,
+  StructuredListHead,
+  StructuredListRow,
+  StructuredListWrapper,
+} from '@carbon/react';
+import { getCoreTranslation, useConfig } from '@openmrs/esm-framework';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { convertToCurrency } from '../../helpers';
+import { type LineItem, type MappedBill } from '../../types';
+import styles from './bill-waiver.scss';
+import BillWaiverForm from './bill-waiver-form.component';
+
+const PatientBillsSelections: React.FC<{ bills: MappedBill; setPatientUuid: (patientUuid) => void }> = ({
+  bills,
+  setPatientUuid,
+}) => {
+  const { t } = useTranslation();
+  const [selectedBills, setSelectedBills] = useState<Array<LineItem>>([]);
+  const { defaultCurrency } = useConfig();
+
+  const checkBoxLabel = (lineItem: LineItem) => {
+    return `${lineItem.item === '' ? lineItem.billableService : lineItem.item} ${convertToCurrency(lineItem.price, defaultCurrency)}`;
+  };
+
+  const handleOnCheckBoxChange = (
+    _event: React.ChangeEvent<HTMLInputElement>,
+    { checked, id }: { checked: boolean; id: string },
+  ) => {
+    const selectedLineItem = bills.lineItems.find((lineItem) => lineItem.uuid === id);
+    if (checked) {
+      setSelectedBills([...selectedBills, selectedLineItem]);
+    } else {
+      setSelectedBills(selectedBills.filter((lineItem) => lineItem.uuid !== id));
+    }
+  };
+  return (
+    <Layer>
+      <StructuredListWrapper className={styles.billListContainer} isCondensed selection={true}>
+        <StructuredListHead>
+          <StructuredListRow head>
+            <StructuredListCell head>{t('billItem', 'Bill item')}</StructuredListCell>
+            <StructuredListCell head>{t('quantity', 'Quantity')}</StructuredListCell>
+            <StructuredListCell head>{t('unitPrice', 'Unit price')}</StructuredListCell>
+            <StructuredListCell head>{t('total', 'Total')}</StructuredListCell>
+            <StructuredListCell head>{getCoreTranslation('actions')}</StructuredListCell>
+          </StructuredListRow>
+        </StructuredListHead>
+        <StructuredListBody>
+          {bills?.lineItems.map((lineItem) => (
+            <StructuredListRow key={lineItem.uuid}>
+              <StructuredListCell>{lineItem.item === '' ? lineItem.billableService : lineItem.item}</StructuredListCell>
+              <StructuredListCell>{lineItem.quantity}</StructuredListCell>
+              <StructuredListCell>{convertToCurrency(lineItem.price, defaultCurrency)}</StructuredListCell>
+              <StructuredListCell>
+                {convertToCurrency(lineItem.price * lineItem.quantity, defaultCurrency)}
+              </StructuredListCell>
+              <StructuredListCell>
+                <Checkbox
+                  hideLabel
+                  onChange={(event, { checked, id }) => handleOnCheckBoxChange(event, { checked, id })}
+                  labelText={checkBoxLabel(lineItem)}
+                  id={lineItem.uuid}
+                />
+              </StructuredListCell>
+            </StructuredListRow>
+          ))}
+        </StructuredListBody>
+      </StructuredListWrapper>
+      <BillWaiverForm bill={bills} lineItems={selectedBills} setPatientUuid={setPatientUuid} />
+    </Layer>
+  );
+};
+
+export default PatientBillsSelections;

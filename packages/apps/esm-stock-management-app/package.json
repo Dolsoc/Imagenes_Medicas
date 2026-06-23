@@ -1,0 +1,90 @@
+{
+  "name": "@sihsalus/esm-stock-management-app",
+  "version": "1.0.0-alpha",
+  "license": "MPL-2.0",
+  "description": "Stock management microfrontend for OpenMRS 3.x",
+  "browser": "dist/openmrs-esm-stock-management-app.js",
+  "main": "src/index.ts",
+  "source": true,
+  "scripts": {
+    "start": "openmrs develop",
+    "serve": "rspack serve --mode=development",
+    "build": "rspack --mode=production",
+    "analyze": "rspack --mode=production --env analyze=true",
+    "lint": "node ../../tooling/scripts/run-biome.js lint .",
+    "prettier": "node ../../tooling/scripts/run-biome.js format --write src",
+    "typescript": "tsc",
+    "test": "vitest run --passWithNoTests",
+    "verify": "turbo run lint typescript coverage",
+    "coverage": "vitest run --coverage --passWithNoTests",
+    "extract-translations": "i18next 'src/**/*.{ts,tsx}' '!src/**/*.test.{ts,tsx}' '!src/**/*.spec.{ts,tsx}' --config ../../tooling/scripts/i18next-parser.config.js",
+    "test-e2e": "yarn --cwd ../../.. playwright test --config e2e/stock-management/playwright.config.ts"
+  },
+  "browserslist": [
+    "extends browserslist-config-openmrs"
+  ],
+  "keywords": [
+    "openmrs",
+    "stock-management",
+    "microfrontends"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openmrs/openmrs-esm-stock-management.git"
+  },
+  "homepage": "https://github.com/openmrs/openmrs-esm-stock-management#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/openmrs/openmrs-esm-stock-management/issues"
+  },
+  "dependencies": {
+    "@carbon/react": "^1.92.1",
+    "@hookform/resolvers": "^3.3.0",
+    "@playwright/test": "^1.58.2",
+    "@sihsalus/esm-rbac": "workspace:*",
+    "dotenv": "^17.3.1",
+    "file-saver": "^2.0.5",
+    "lodash-es": "^4.17.21",
+    "react-hook-form": "^7.45.4",
+    "react-to-print": "^2.14.13",
+    "yup": "^1.2.0",
+    "zod": "^3.22.2"
+  },
+  "peerDependencies": {
+    "@openmrs/esm-framework": "*",
+    "dayjs": "1.x",
+    "react": "18.x",
+    "react-i18next": "16.x",
+    "react-router-dom": "6.x",
+    "rxjs": "6.x",
+    "swr": "2.x"
+  },
+  "devDependencies": {
+    "@openmrs/esm-framework": "workspace:*",
+    "@openmrs/esm-styleguide": "workspace:*",
+    "@rspack/cli": "1.7.11",
+    "@swc/cli": "0.8.1",
+    "@swc/core": "1.15.21",
+    "@types/file-saver": "^2.0.5",
+    "@types/react": "^18.3.21",
+    "@types/react-dom": "^18.3.0",
+    "css-loader": "^6.8.1",
+    "dayjs": "^1.11.9",
+    "i18next": "^25.0.0",
+    "i18next-parser": "^9.3.0",
+    "openmrs": "*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^16.0.0",
+    "react-router-dom": "^6.14.1",
+    "rxjs": "^6.6.7",
+    "swc-loader": "^0.2.3",
+    "swr": "^2.2.4",
+    "turbo": "^2.9.14",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.7",
+    "yup": "^1.2.0"
+  }
+}

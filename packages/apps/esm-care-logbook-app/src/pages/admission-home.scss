@@ -1,0 +1,231 @@
+@use "@carbon/colors";
+@use "@carbon/layout";
+@use "@carbon/type";
+@use "@openmrs/esm-styleguide/src/vars" as *;
+
+.page {
+  width: 100%;
+  padding: 0;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) auto;
+  align-items: center;
+  gap: layout.$spacing-05;
+  margin-bottom: 1.5rem;
+  padding-right: layout.$spacing-05;
+  background-color: $ui-02;
+  border: 1px solid $ui-03;
+  border-left: 0;
+}
+
+.headerContent {
+  min-width: max-content;
+}
+
+.headerContent p:last-child {
+  white-space: nowrap;
+}
+
+.headerAction {
+  justify-self: end;
+  text-decoration: none;
+}
+
+.content {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.summary {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1rem;
+}
+
+.summaryTile {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 7.875rem;
+  margin: layout.$spacing-03;
+  padding: layout.$spacing-05;
+  border: 1px solid colors.$gray-20;
+  background-color: colors.$white;
+}
+
+.summaryTileHeader {
+  @include type.type-style("heading-01");
+  color: colors.$gray-70;
+  font-weight: 600;
+  line-height: 1.28572;
+  letter-spacing: 0.16px;
+}
+
+.summaryTileDetails {
+  margin-top: layout.$spacing-06;
+}
+
+.summaryTileLabel {
+  @include type.type-style("label-01");
+  color: $text-02;
+}
+
+.summaryTileValue {
+  color: colors.$black;
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 1.28572;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: minmax(16rem, 1fr) minmax(12rem, 18rem) auto;
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  background: #ffffff;
+}
+
+.table {
+  width: 100%;
+  min-width: 116rem;
+  table-layout: fixed;
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
+.table th {
+  white-space: normal;
+}
+
+.table td {
+  overflow-wrap: anywhere;
+}
+
+.dateColumn {
+  width: 6rem;
+}
+
+.identifierColumn {
+  width: 8rem;
+}
+
+.documentTypeColumn {
+  width: 6rem;
+}
+
+.statusColumn {
+  width: 9rem;
+}
+
+.responsibleColumn {
+  width: 14rem;
+}
+
+.shortColumn {
+  width: 6rem;
+}
+
+.personColumn {
+  width: 13rem;
+}
+
+.addressColumn {
+  width: 12rem;
+}
+
+.ageColumn {
+  width: 7rem;
+}
+
+.serviceColumn {
+  width: 12rem;
+}
+
+.orderColumn {
+  width: 6rem;
+}
+
+.communicationColumn {
+  width: 12rem;
+}
+
+.table td:nth-child(11),
+.table td:nth-child(12),
+.table td:nth-child(14) {
+  text-align: center;
+}
+
+.patientLink {
+  color: #0f62fe;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.empty {
+  margin: 0;
+  padding: 1rem;
+  color: #525252;
+}
+
+@media (max-width: 42rem) {
+  .page {
+    padding: 0;
+  }
+
+  .header {
+    align-items: flex-start;
+    grid-template-columns: 1fr;
+    gap: layout.$spacing-03;
+    padding-right: layout.$spacing-04;
+    padding-bottom: layout.$spacing-04;
+  }
+
+  .headerAction {
+    justify-self: start;
+  }
+
+  .content {
+    padding: 0 1rem 1rem;
+  }
+
+  .summary,
+  .controls {
+    grid-template-columns: 1fr;
+  }
+
+  .summary {
+    display: grid;
+  }
+
+  .headerContent {
+    min-width: 0;
+  }
+
+  .headerContent p:last-child {
+    white-space: normal;
+  }
+}

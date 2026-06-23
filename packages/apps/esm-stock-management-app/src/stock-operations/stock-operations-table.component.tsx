@@ -1,0 +1,348 @@
+import {
+  DataTable,
+  DataTableSkeleton,
+  DatePicker,
+  DatePickerInput,
+  InlineLoading,
+  Link,
+  Pagination,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableExpandedRow,
+  TableExpandHeader,
+  TableExpandRow,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableToolbar,
+  TableToolbarAction,
+  TableToolbarContent,
+  TableToolbarMenu,
+  TableToolbarSearch,
+  Tile,
+} from '@carbon/react';
+import { ArrowRight } from '@carbon/react/icons';
+import { isDesktop, restBaseUrl } from '@openmrs/esm-framework';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { DATE_PICKER_CONTROL_FORMAT, DATE_PICKER_FORMAT, StockFilters } from '../constants';
+import { ResourceRepresentation } from '../core/api/api';
+import { formatDisplayDate } from '../core/utils/datetimeUtils';
+import {
+  translateStockLocation,
+  translateStockOperationStatus,
+  translateStockOperationType,
+} from '../core/utils/translationUtils';
+import { handleMutate } from '../utils';
+import StockOperationExpandedRow from './add-stock-operation/stock-operations-expanded-row/stock-operation-expanded-row.component';
+import EditStockOperationActionMenu from './edit-stock-operation/edit-stock-operation-action-menu.component';
+import StockOperationTypesSelector from './stock-operation-types-selector/stock-operation-types-selector.component';
+import StockOperationsFilters from './stock-operations-filters.component';
+import { useStockOperationPages } from './stock-operations-table.resource';
+import styles from './stock-operations-table.scss';
+
+interface StockOperationsTableProps {
+  status?: string;
+}
+
+type StockOperationHeader = {
+  key: string;
+  header: React.ReactNode | { content: React.ReactNode };
+  isSortable?: boolean;
+};
+
+const normalizeStockOperationHeader = (header: StockOperationHeader['header'] | null | undefined): React.ReactNode => {
+  if (!header) {
+    return '';
+  }
+
+  if (typeof header === 'object' && 'content' in header) {
+    return (header as { content: React.ReactNode }).content;
+  }
+
+  return header;
+};
+
+const StockOperations: React.FC<StockOperationsTableProps> = () => {
+  const { t } = useTranslation();
+
+  const handleRefresh = () => {
+    handleMutate(`${restBaseUrl}/stockmanagement/stockoperation`);
+  };
+
+  const [selectedFromDate, setSelectedFromDate] = useState(null);
+  const [selectedToDate, setSelectedToDate] = useState(null);
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [selectedOperations, setSelectedOperations] = useState<string[]>([]);
+
+  const { items, tableHeaders, currentPage, pageSizes, totalItems, goTo, currentPageSize, setPageSize, isLoading } =
+    useStockOperationPages({
+      v: ResourceRepresentation.Full,
+      totalCount: true,
+      operationDateMin: selectedFromDate?.toISOString(),
+      operationDateMax: selectedToDate?.toISOString(),
+      status: selectedStatus.join(','),
+      sourceTypeUuid: selectedSources.join(','),
+      operationTypeUuid: selectedOperations.join(','),
+    });
+
+  const filterApplied =
+    selectedFromDate || selectedToDate || selectedSources.length || selectedStatus.length || selectedOperations.length;
+
+  const handleOnFilterChange = useCallback((selectedItems, filterType) => {
+    if (filterType === StockFilters.SOURCES) {
+      setSelectedSources(selectedItems);
+    } else if (filterType === StockFilters.OPERATION) {
+      setSelectedOperations(selectedItems);
+    } else {
+      setSelectedStatus(selectedItems);
+    }
+  }, []);
+
+  const handleDateFilterChange = ([startDate, endDate]) => {
+    if (startDate) {
+      setSelectedFromDate(startDate);
+      if (selectedToDate && selectedToDate < startDate) {
+        setSelectedToDate(startDate);
+      }
+    }
+    if (endDate) {
+      setSelectedToDate(endDate);
+      if (selectedFromDate && selectedFromDate > endDate) {
+        setSelectedFromDate(endDate);
+      }
+    }
+  };
+
+  const tableRows = useMemo(
+    () =>
+      items?.map((stockOperation, index) => {
+        const threshHold = 1;
+        const itemCountGreaterThanThreshhold = (stockOperation?.stockOperationItems?.length ?? 0) > threshHold;
+        const commonNames =
+          stockOperation?.stockOperationItems
+            ?.slice(0, itemCountGreaterThanThreshhold ? threshHold : undefined)
+            .map((item) => item.commonName)
+            .join(', ') ?? '';
+
+        return {
+          ...stockOperation,
+          id: stockOperation?.uuid,
+          key: `key-${stockOperation?.uuid}`,
+          operationTypeName: translateStockOperationType(t, stockOperation?.operationTypeName),
+          operationNumber: (
+            <EditStockOperationActionMenu stockOperation={stockOperation} showIcon={false} showprops={true} />
+          ),
+          stockOperationItems: {
+            commonNames,
+            more: itemCountGreaterThanThreshhold ? stockOperation?.stockOperationItems?.length - threshHold : 0,
+          },
+          status: translateStockOperationStatus(t, stockOperation?.status),
+          source: translateStockLocation(t, stockOperation?.sourceName),
+          destination: translateStockLocation(t, stockOperation?.destinationName),
+          location: (
+            <>
+              {translateStockLocation(t, stockOperation?.sourceName)}
+              {stockOperation?.sourceName && stockOperation?.destinationName ? (
+                <ArrowRight className={styles.arrowIcon} key={`${index}-0`} size={12} />
+              ) : (
+                ''
+              )}{' '}
+              {translateStockLocation(t, stockOperation?.destinationName)}
+            </>
+          ),
+          responsiblePerson: `${
+            stockOperation?.responsiblePersonFamilyName ?? stockOperation?.responsiblePersonOther ?? ''
+          } ${stockOperation?.responsiblePersonGivenName ?? ''}`,
+          operationDate: formatDisplayDate(stockOperation?.operationDate),
+          actions: <EditStockOperationActionMenu stockOperation={stockOperation} showIcon={true} showprops={false} />,
+        };
+      }),
+    [items, t],
+  );
+
+  const dataTableHeaders = useMemo<Array<Omit<StockOperationHeader, 'header'> & { header: React.ReactNode }>>(
+    () =>
+      tableHeaders.map(({ header, ...rest }) => ({
+        ...rest,
+        header: normalizeStockOperationHeader(header),
+      })),
+    [tableHeaders],
+  );
+
+  if (isLoading && !filterApplied) {
+    return (
+      <DataTableSkeleton className={styles.dataTableSkeleton} showHeader={false} rowCount={5} columnCount={5} zebra />
+    );
+  }
+
+  return (
+    <>
+      <h2 className={styles.tableHeader}>
+        {t('stockOperationsTableHeader', 'Stock operations to track movement of stock.')}
+      </h2>
+      <DataTable headers={dataTableHeaders} isSortable rows={tableRows} useZebraStyles>
+        {({ expandRow, getHeaderProps, getRowProps, getTableProps, headers, onInputChange, rows }) => (
+          <TableContainer>
+            <TableToolbar
+              style={{
+                position: 'static',
+                overflow: 'visible',
+                backgroundColor: 'color',
+              }}
+            >
+              <TableToolbarContent className={styles.toolbarContent}>
+                <TableToolbarSearch
+                  expanded
+                  labelText={t('searchStockOperations', 'Search stock operations')}
+                  onChange={onInputChange}
+                  placeholder={t('searchStockOperations', 'Search stock operations')}
+                />
+                <div className={styles.container}>
+                  <DatePicker
+                    className={styles.datePicker}
+                    datePickerType="range"
+                    dateFormat={DATE_PICKER_CONTROL_FORMAT}
+                    locale="en"
+                    onChange={([startDate, endDate]) => handleDateFilterChange([startDate, endDate])}
+                    value={[selectedFromDate, selectedToDate]}
+                  >
+                    <DatePickerInput
+                      id="stock-operations-start-date"
+                      labelText={t('startDate', 'Start date')}
+                      placeholder={DATE_PICKER_FORMAT}
+                    />
+                    <DatePickerInput
+                      id="stock-operations-end-date"
+                      labelText={t('endDate', 'End date')}
+                      placeholder={DATE_PICKER_FORMAT}
+                    />
+                  </DatePicker>
+                  <StockOperationsFilters filterName={StockFilters.SOURCES} onFilterChange={handleOnFilterChange} />
+                  <StockOperationsFilters filterName={StockFilters.STATUS} onFilterChange={handleOnFilterChange} />
+                  <StockOperationsFilters filterName={StockFilters.OPERATION} onFilterChange={handleOnFilterChange} />
+                </div>
+                <TableToolbarMenu>
+                  <TableToolbarAction className={styles.toolbarMenuAction} onClick={handleRefresh}>
+                    {t('refresh', 'Refresh')}
+                  </TableToolbarAction>
+                </TableToolbarMenu>
+
+                <StockOperationTypesSelector />
+              </TableToolbarContent>
+            </TableToolbar>
+            <Table {...getTableProps()}>
+              <TableHead>
+                <TableRow>
+                  <TableExpandHeader />
+                  {headers.map((header) => {
+                    const { key, ...headerProps } = getHeaderProps({
+                      header,
+                      isSortable: header.isSortable,
+                    });
+
+                    return (
+                      header.key !== 'details' && (
+                        <TableHeader
+                          {...headerProps}
+                          className={isDesktop ? styles.desktopHeader : styles.tabletHeader}
+                          key={key}
+                        >
+                          {header.header}
+                        </TableHeader>
+                      )
+                    );
+                  })}
+                  <TableHeader></TableHeader>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows?.map((row, index) => {
+                  const { key, ...rowProps } = getRowProps({ row });
+                  return (
+                    <React.Fragment key={row.id}>
+                      <TableExpandRow
+                        className={isDesktop ? styles.desktopRow : styles.tabletRow}
+                        key={key}
+                        {...rowProps}
+                      >
+                        {row.cells.map((cell) => (
+                          <TableCell key={cell.id}>
+                            {cell?.info?.header === 'stockOperationItems' ? (
+                              <span>
+                                <span>{cell.value.commonNames}</span>
+                                {cell.value.more > 0 && (
+                                  <Link onClick={() => expandRow(row.id)}>
+                                    {t('moreItems', '...({{count}} more)', { count: cell.value.more })}
+                                  </Link>
+                                )}
+                              </span>
+                            ) : (
+                              cell.value
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableExpandRow>
+                      {row.isExpanded ? (
+                        <TableExpandedRow colSpan={headers.length + 2}>
+                          <StockOperationExpandedRow model={items[index]} />
+                        </TableExpandedRow>
+                      ) : (
+                        <TableExpandedRow className={styles.hiddenRow} colSpan={headers.length + 2} />
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            {rows.length === 0 && !isLoading ? (
+              <div className={styles.tileContainer}>
+                <Tile className={styles.tile}>
+                  <div className={styles.tileContent}>
+                    <p className={styles.content}>{t('noOperationsToDisplay', 'No stock operations to display')}</p>
+                    <p className={styles.helper}>{t('checkFilters', 'Check the filters above')}</p>
+                  </div>
+                </Tile>
+              </div>
+            ) : null}
+            {Boolean(filterApplied && isLoading) && (
+              <div className={styles.rowLoadingContainer}>
+                <InlineLoading description={t('loadingPlaceholder', 'Loading...')} />
+              </div>
+            )}
+          </TableContainer>
+        )}
+      </DataTable>
+      {items.length > 0 && (
+        <Pagination
+          backwardText={t('previousPage', 'Previous page')}
+          forwardText={t('nextPage', 'Next page')}
+          itemRangeText={(min, max, total) =>
+            t('itemRangeText', '{{min}}-{{max}} de {{total}} elementos', { min, max, total })
+          }
+          itemsPerPageText={t('itemsPerPage', 'Elementos por página:')}
+          page={currentPage}
+          pageNumberText={t('pageNumber', 'Número de página')}
+          pageRangeText={(_, total) => t('pageRangeText', 'de {{total}} páginas', { total })}
+          pageSize={currentPageSize}
+          pageSizes={pageSizes}
+          totalItems={totalItems}
+          onChange={({ pageSize, page }) => {
+            if (pageSize !== currentPageSize) {
+              setPageSize(pageSize);
+            }
+            if (page !== currentPage) {
+              goTo(page);
+            }
+          }}
+          className={styles.paginationOverride}
+        />
+      )}
+    </>
+  );
+};
+
+export default StockOperations;

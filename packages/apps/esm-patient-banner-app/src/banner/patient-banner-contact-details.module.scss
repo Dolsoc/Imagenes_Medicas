@@ -1,0 +1,72 @@
+@use "@carbon/layout";
+@use "@carbon/type";
+@use "@openmrs/esm-styleguide/src/vars" as *;
+
+.contactDetails,
+.deceased {
+  color: $text-02;
+  width: 100%;
+  border-top: 1px solid $ui-03;
+}
+
+.heading {
+  @include type.type-style("heading-compact-01");
+  color: $text-02;
+}
+
+.tiles {
+  @include type.type-style("body-compact-01");
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  align-items: stretch;
+}
+
+.tiles > .col {
+  min-width: 0;
+  padding: layout.$spacing-05;
+  border-right: 1px solid $ui-03;
+  border-bottom: 1px solid $ui-03;
+}
+
+.detailList {
+  margin: layout.$spacing-03 0 0;
+  padding-left: layout.$spacing-05;
+  list-style: disc;
+}
+
+.detailList li {
+  margin: layout.$spacing-03 0;
+  padding-left: layout.$spacing-02;
+}
+
+.itemLabel {
+  font-weight: 600;
+}
+
+.emptyState {
+  margin: layout.$spacing-03 0 0;
+  color: $text-02;
+}
+
+.relationship {
+  display: list-item;
+}
+
+.relationshipContent {
+  display: flex;
+  flex-wrap: wrap;
+  gap: layout.$spacing-02;
+  align-items: baseline;
+}
+
+.relationshipMeta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: layout.$spacing-02;
+  color: $text-02;
+}
+
+.relationshipMeta span:not(:last-child)::after {
+  content: '\00b7';
+  margin-left: layout.$spacing-02;
+}

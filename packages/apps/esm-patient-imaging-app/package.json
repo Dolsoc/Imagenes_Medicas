@@ -1,0 +1,93 @@
+{
+  "name": "@sihsalus/esm-patient-imaging-app",
+  "version": "1.0.0-alpha",
+  "license": "MPL-2.0",
+  "description": "Patient imaging microfrontend for the OpenMRS SPA",
+  "browser": "dist/openmrs-esm-patient-imaging-app.js",
+  "main": "src/index.ts",
+  "source": true,
+  "scripts": {
+    "start": "openmrs develop",
+    "serve": "rspack serve --mode=development",
+    "build": "rspack --mode=production",
+    "analyze": "rspack --mode=production --env analyze=true",
+    "lint": "node ../../tooling/scripts/run-biome.js lint .",
+    "prettier": "node ../../tooling/scripts/run-biome.js format --write src",
+    "typescript": "tsc",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest watch",
+    "test-e2e": "yarn --cwd ../../.. playwright test --config e2e/patient-imaging/playwright.config.ts",
+    "verify": "turbo lint typescript coverage",
+    "coverage": "vitest run --coverage --passWithNoTests",
+    "extract-translations": "i18next 'src/**/*.{ts,tsx}' '!src/**/*.test.{ts,tsx}' '!src/**/*.spec.{ts,tsx}' --config ../../tooling/scripts/i18next-parser.config.js"
+  },
+  "browserslist": [
+    "extends browserslist-config-openmrs"
+  ],
+  "keywords": [
+    "openmrs",
+    "microfrontends",
+    "Imaging",
+    "Worklist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sadrezhao/openmrs-esm-patient-imaging-app.git"
+  },
+  "homepage": "https://github.com/sadrezhao/openmrs-esm-patient-imaging-app/blob/main/README.md",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/sadrezhao/openmrs-esm-patient-imaging-app/issues"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.x",
+    "@internationalized/date": "^3.x",
+    "lodash-es": "^4.17.21",
+    "open": "^8.4.0",
+    "react-hook-form": "^7.x",
+    "react-is": "^19.1.0",
+    "zod": "^3.x"
+  },
+  "peerDependencies": {
+    "@carbon/react": "1.x",
+    "@openmrs/esm-framework": "*",
+    "@openmrs/esm-patient-common-lib": "*",
+    "dayjs": "1.x",
+    "react": "18.x",
+    "react-i18next": "16.x",
+    "react-router-dom": "6.x",
+    "rxjs": "6.x",
+    "swr": "2.x"
+  },
+  "devDependencies": {
+    "@openmrs/esm-framework": "workspace:*",
+    "@openmrs/esm-patient-common-lib": "workspace:*",
+    "@openmrs/esm-styleguide": "workspace:*",
+    "@playwright/test": "^1.58.2",
+    "@rspack/cli": "1.7.11",
+    "@swc/cli": "0.8.1",
+    "@swc/core": "1.15.21",
+    "@types/react": "^18.2.14",
+    "@types/react-dom": "^18.2.6",
+    "css-loader": "^6.8.1",
+    "dayjs": "1.x",
+    "dotenv": "^17.3.1",
+    "i18next": "^25.0.0",
+    "i18next-parser": "^9.0.2",
+    "openmrs": "*",
+    "react": "^18.x",
+    "react-dom": "^18.x",
+    "react-i18next": "^16.0.0",
+    "rxjs": "^6.6.7",
+    "sass": "^1.54.3",
+    "swc-loader": "^0.2.3",
+    "swr": "^2.x",
+    "ts-node": "^10.9.2",
+    "turbo": "^2.9.14",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.7"
+  },
+  "author": "Wei Sadre (Uclouvain-ICTEAM)"
+}

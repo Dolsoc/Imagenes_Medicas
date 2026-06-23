@@ -1,0 +1,101 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ResourceRepresentation } from '../../../core/api/api';
+import {
+  type StockItemInventoryFilter,
+  useStockItemInventory,
+  useStockItemTransactions,
+} from '../../stock-items.resource';
+
+export function useStockItemsTransactions(filter?: StockItemInventoryFilter) {
+  const { t } = useTranslation();
+  const [stockItemFilter, setStockItemFilter] = useState<StockItemInventoryFilter>({
+    startIndex: 0,
+    v: filter?.v || ResourceRepresentation.Default,
+    limit: 10,
+    q: filter?.q,
+    totalCount: true,
+    stockItemUuid: filter?.stockItemUuid,
+  });
+
+  const pageSizes = [10, 20, 30, 40, 50];
+  const [currentPageSize, setPageSize] = useState(10);
+  const [searchString, setSearchString] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [stockItemUuid, setStockItemUuid] = useState<string | null>(filter?.stockItemUuid);
+  const [partyUuid, setPartyUuid] = useState<string | null>(filter?.partyUuid);
+  const [locationUuid, setLocationUuid] = useState<string | null>(filter?.locationUuid);
+  const [stockBatchUuid, setStockBatchUuid] = useState<string | null>(filter?.stockBatchUuid);
+
+  useEffect(() => {
+    setStockItemUuid(filter?.stockItemUuid ?? null);
+  }, [filter?.stockItemUuid]);
+
+  useEffect(() => {
+    setStockItemFilter({
+      startIndex: currentPage - 1,
+      v: ResourceRepresentation.Default,
+      limit: currentPageSize,
+      q: searchString,
+      totalCount: true,
+      stockItemUuid: stockItemUuid,
+      partyUuid: partyUuid,
+      locationUuid: locationUuid,
+      stockBatchUuid: stockBatchUuid,
+    });
+  }, [searchString, currentPage, currentPageSize, stockItemUuid, partyUuid, locationUuid, stockBatchUuid]);
+
+  const { items, isLoading, error } = useStockItemTransactions(stockItemFilter);
+  const { items: inventory } = useStockItemInventory(stockItemFilter);
+
+  const tableHeaders = useMemo(
+    () => [
+      { key: 'date', header: t('date', 'Date') },
+      { key: 'location', header: t('location', 'Location') },
+      { key: 'transaction', header: t('transaction', 'Transaction') },
+      { key: 'in', header: t('in', 'IN') },
+      { key: 'out', header: t('out', 'OUT') },
+      { key: 'batch', header: t('batch', 'Batch') },
+      { key: 'reference', header: t('references', 'References') },
+      { key: 'status', header: t('status', 'Status') },
+    ],
+    [t],
+  );
+
+  const binCardHeaders = useMemo(
+    () => [
+      { key: 'date', header: t('date', 'Date') },
+      { key: 'location', header: t('location', 'Location') },
+      { key: 'transaction', header: t('transaction', 'Transaction') },
+      { key: 'totalin', header: t('in', 'IN') },
+      { key: 'totalout', header: t('out', 'OUT') },
+      { key: 'batch', header: t('batch', 'Batch') },
+      { key: 'balance', header: t('balance', 'Balance') },
+      { key: 'reference', header: t('references', 'References') },
+      { key: 'status', header: t('status', 'Status') },
+    ],
+    [t],
+  );
+
+  return {
+    items: items.results,
+    totalCount: items.totalCount,
+    currentPage,
+    currentPageSize,
+    setCurrentPage,
+    setPageSize,
+    pageSizes,
+    isLoading,
+    error,
+    setSearchString,
+    tableHeaders,
+    setStockItemUuid,
+    setLocationUuid,
+    setPartyUuid,
+    setStockBatchUuid,
+    binCardHeaders,
+    inventory: inventory,
+  };
+}

@@ -1,0 +1,33 @@
+@use "@carbon/colors";
+@use "@carbon/layout";
+
+.navItem {
+  width: 100%;
+}
+
+.navTooltip {
+  width: 100%;
+
+  :global(.cds--tooltip-trigger__wrapper),
+  :global(.cds--side-nav__link) {
+    display: block;
+    width: 100%;
+  }
+
+  :global(.cds--popover),
+  :global(.cds--popover-container),
+  :global(.cds--tooltip-content) {
+    z-index: 9000;
+  }
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.icon {
+  margin-right: layout.$spacing-06;
+  fill: colors.$gray-70;
+}

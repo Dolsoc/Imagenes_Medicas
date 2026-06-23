@@ -1,0 +1,83 @@
+{
+  "name": "@sihsalus/esm-dispensing-app",
+  "version": "1.0.0-alpha",
+  "license": "MPL-2.0",
+  "description": "Medication dispensing application",
+  "browser": "dist/openmrs-esm-dispensing-app.js",
+  "main": "src/index.ts",
+  "source": true,
+  "scripts": {
+    "start": "openmrs develop",
+    "serve": "rspack serve --mode=development",
+    "build": "rspack --mode=production",
+    "analyze": "rspack --mode=production --env analyze=true",
+    "lint": "node ../../tooling/scripts/run-biome.js lint .",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest watch",
+    "typescript": "tsc",
+    "verify": "turbo run lint test typescript",
+    "extract-translations": "i18next 'src/**/*.{ts,tsx}' '!src/**/*.test.{ts,tsx}' '!src/**/*.spec.{ts,tsx}' --config ../../tooling/scripts/i18next-parser.config.js",
+    "check-translations": "yarn extract-translations && git diff --exit-code -- translations/en.json",
+    "coverage": "vitest run --coverage --passWithNoTests",
+    "test-e2e": "yarn --cwd ../../.. playwright test --config e2e/dispensing/playwright.config.ts"
+  },
+  "browserslist": [
+    "extends browserslist-config-openmrs"
+  ],
+  "keywords": [
+    "openmrs",
+    "microfrontends",
+    "medication",
+    "dispensing",
+    "pharmacy"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openmrs/openmrs-esm-dispensing.git"
+  },
+  "homepage": "https://github.com/openmrs/openmrs-esm-dispensing#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/openmrs/openmrs-esm-dispensing/issues"
+  },
+  "dependencies": {
+    "@carbon/react": "^1.83.0",
+    "@openmrs/esm-utils": "workspace:*",
+    "@sihsalus/esm-rbac": "workspace:*",
+    "classnames": "^2.5.1",
+    "react-to-print": "^2.14.13"
+  },
+  "peerDependencies": {
+    "@openmrs/esm-framework": "*",
+    "dayjs": "1.x",
+    "react": "18.x",
+    "react-dom": "18.x",
+    "react-i18next": "16.x",
+    "rxjs": "6.x",
+    "swr": "2.x"
+  },
+  "devDependencies": {
+    "@openmrs/esm-framework": "workspace:*",
+    "@playwright/test": "^1.52.0",
+    "@swc/core": "1.15.21",
+    "@types/react": "^18.3.21",
+    "@types/react-dom": "^18.3.0",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.3.1",
+    "i18next": "^25.0.0",
+    "i18next-parser": "^9.3.0",
+    "openmrs": "*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^16.0.0",
+    "react-router-dom": "^6.3.0",
+    "rxjs": "^6.6.7",
+    "swr": "^2.2.5",
+    "turbo": "^2.9.14",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.7"
+  },
+  "packageManager": "yarn@4.10.3"
+}

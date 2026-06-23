@@ -1,0 +1,82 @@
+{
+  "name": "@sihsalus/esm-fast-data-entry-app",
+  "version": "1.0.0-alpha",
+  "license": "MPL-2.0",
+  "description": "O3 frontend module for fast data entry using the OpenMRS Angular Form Engine",
+  "browser": "dist/openmrs-esm-fast-data-entry-app.js",
+  "main": "src/index.ts",
+  "source": true,
+  "scripts": {
+    "start": "openmrs develop",
+    "serve": "rspack serve --mode=development",
+    "build": "rspack --mode=production",
+    "analyze": "rspack --mode=production --env analyze=true",
+    "lint": "node ../../tooling/scripts/run-biome.js lint src",
+    "prettier": "node ../../tooling/scripts/run-biome.js format --write src",
+    "typescript": "tsc",
+    "test": "vitest run --passWithNoTests",
+    "verify": "turbo lint typescript test",
+    "coverage": "vitest run --coverage --passWithNoTests",
+    "extract-translations": "i18next 'src/**/*.{ts,tsx}' '!src/**/*.test.{ts,tsx}' '!src/**/*.spec.{ts,tsx}' --config ../../tooling/scripts/i18next-parser.config.js",
+    "test-e2e": "yarn --cwd ../../.. playwright test --config e2e/fast-data-entry/playwright.config.ts"
+  },
+  "browserslist": [
+    "extends browserslist-config-openmrs"
+  ],
+  "keywords": [
+    "openmrs",
+    "microfrontends"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openmrs/openmrs-esm-fast-data-entry-app.git"
+  },
+  "homepage": "https://github.com/openmrs/openmrs-esm-fast-data-entry-app#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/openmrs/openmrs-esm-fast-data-entry-app/issues"
+  },
+  "peerDependencies": {
+    "@carbon/react": "1.x",
+    "@openmrs/esm-framework": "*",
+    "lodash-es": "4.x",
+    "react": "18.x",
+    "react-dom": "18.x",
+    "react-i18next": "^16.0.0",
+    "react-router-dom": "6.x",
+    "swr": "2.x"
+  },
+  "devDependencies": {
+    "@carbon/react": "^1.83.0",
+    "@openmrs/esm-framework": "workspace:*",
+    "@playwright/test": "^1.50.1",
+    "@swc-node/loader": "^1.3.7",
+    "@swc/core": "1.15.21",
+    "@types/react": "^18.3.21",
+    "@types/react-dom": "^18.3.0",
+    "@types/testing-library__jest-dom": "^5.14.9",
+    "concurrently": "^6.5.1",
+    "i18next": "^25.0.0",
+    "i18next-parser": "^9.3.0",
+    "lodash-es": "^4.17.21",
+    "openmrs": "*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^16.0.0",
+    "react-router-dom": "^6.15.0",
+    "semver": "^7.5.4",
+    "swr": "^2.2.4",
+    "turbo": "^2.9.14",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.7"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "playwright": "^1.50.1",
+    "react-hook-form": "^7.34.2",
+    "uuid": "^14.0.0"
+  },
+  "packageManager": "yarn@4.9.1"
+}

@@ -1,0 +1,80 @@
+import { Button } from '@carbon/react';
+import { clearConfigErrors, temporaryConfigStore, useStore } from '@openmrs/esm-framework/src/internal';
+import ace from 'ace-builds/src-noconflict/ace';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/theme-dracula';
+import classNames from 'classnames';
+import { useCallback, useEffect, useState } from 'react';
+import AceEditor from 'react-ace';
+import { useTranslation } from 'react-i18next';
+
+import styles from './json-editor.scss';
+
+// Configure ace to bundle workers locally (webpack 5 asset modules)
+// Using new URL() syntax instead of deprecated file-loader or CDN for offline compatibility
+ace.config.setModuleUrl(
+  'ace/mode/json_worker',
+  new URL('ace-builds/src-noconflict/worker-json.js', import.meta.url).href,
+);
+
+export interface JsonEditorProps {
+  /** A CSS value */
+  height: string;
+}
+
+export default function JsonEditor({ height }: JsonEditorProps) {
+  const { t } = useTranslation();
+  const temporaryConfig = useStore(temporaryConfigStore);
+  const [editorValue, setEditorValue] = useState('');
+  const [error, setError] = useState('');
+  const [key, setKey] = useState(`ace-editor`);
+
+  const updateTemporaryConfig = useCallback(() => {
+    let config;
+    try {
+      config = JSON.parse(editorValue);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Invalid JSON');
+      return;
+    }
+    setError('');
+    clearConfigErrors();
+    temporaryConfigStore.setState({ config });
+  }, [editorValue]);
+
+  useEffect(() => {
+    if (editorValue !== JSON.stringify(temporaryConfig.config, null, 2)) {
+      setKey((k) => `${k}+`); // just keep appending plus signs
+    }
+  }, [temporaryConfig.config, editorValue]);
+
+  return (
+    <div>
+      <AceEditor
+        defaultValue={JSON.stringify(temporaryConfig.config, null, 2)}
+        fontSize="1rem"
+        height={`calc(${height} - 3rem)`}
+        key={key}
+        mode="json"
+        onChange={(v) => setEditorValue(v)}
+        showGutter
+        showPrintMargin={false}
+        tabSize={2}
+        theme="dracula"
+        width="100vw"
+      />
+      <div className={styles.toolbar}>
+        <Button size="md" type="submit" onClick={updateTemporaryConfig}>
+          {t('updateConfig', 'Update config')}
+        </Button>
+        <div
+          className={classNames(styles.alert, {
+            [styles.errorBackground]: error,
+          })}
+        >
+          {error}
+        </div>
+      </div>
+    </div>
+  );
+}

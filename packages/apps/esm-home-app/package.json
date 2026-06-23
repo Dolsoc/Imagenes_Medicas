@@ -1,0 +1,55 @@
+{
+  "name": "@sihsalus/esm-home-app",
+  "version": "1.0.0-alpha",
+  "description": "Homepage microfrontend for the Sihsalus SPA",
+  "browser": "dist/openmrs-esm-home-app.js",
+  "main": "src/index.ts",
+  "license": "MPL-2.0",
+  "homepage": "https://github.com/openmrs/openmrs-esm-home#readme",
+  "scripts": {
+    "start": "openmrs develop",
+    "serve": "rspack serve --mode=development",
+    "debug": "yarn serve",
+    "build": "rspack --mode production",
+    "analyze": "rspack --mode=production --env.analyze=true",
+    "lint": "node ../../tooling/scripts/run-biome.js lint .",
+    "typescript": "tsc",
+    "verify": "turbo lint typescript test --color",
+    "extract-translations": "i18next 'src/**/*.{ts,tsx}' '!src/**/*.test.{ts,tsx}' '!src/**/*.spec.{ts,tsx}' --config ../../tooling/scripts/i18next-parser.config.js",
+    "test": "vitest run --passWithNoTests",
+    "coverage": "vitest run --coverage --passWithNoTests"
+  },
+  "browserslist": [
+    "extends browserslist-config-openmrs"
+  ],
+  "keywords": [
+    "openmrs"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openmrs/openmrs-esm-home.git"
+  },
+  "bugs": {
+    "url": "https://github.com/openmrs/openmrs-esm-home/issues"
+  },
+  "dependencies": {
+    "@sihsalus/esm-rbac": "workspace:*"
+  },
+  "peerDependencies": {
+    "@openmrs/esm-framework": "*",
+    "react": "18.x",
+    "react-i18next": "16.x",
+    "react-router-dom": "6.x",
+    "swr": "2.x"
+  },
+  "devDependencies": {
+    "i18next": "^25.0.0",
+    "i18next-parser": "^9.3.0",
+    "openmrs": "*",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.7"
+  }
+}

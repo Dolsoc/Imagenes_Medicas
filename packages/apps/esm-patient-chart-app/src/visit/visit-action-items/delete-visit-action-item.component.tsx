@@ -1,0 +1,50 @@
+import { Button } from '@carbon/react';
+import { showModal, TrashCanIcon, UserHasAccess, useLayoutType, type Visit } from '@openmrs/esm-framework';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+
+interface DeleteVisitActionItemProps {
+  patientUuid: string;
+  visit: Visit;
+}
+
+const DeleteVisitActionItem: React.FC<DeleteVisitActionItemProps> = ({ patientUuid, visit }) => {
+  const { t } = useTranslation();
+  const isTablet = useLayoutType() === 'tablet';
+
+  const deleteVisit = () => {
+    const dispose = showModal('delete-visit-dialog', {
+      patientUuid,
+      visit,
+      closeModal: () => dispose(),
+    });
+  };
+
+  const cancelVisit = () => {
+    const dispose = showModal('cancel-visit-dialog', {
+      patientUuid,
+      closeModal: () => dispose(),
+    });
+  };
+
+  const isActiveVisit = !visit?.stopDatetime;
+
+  if (visit?.encounters?.length) {
+    return null;
+  }
+
+  return (
+    <UserHasAccess privilege="Delete Visits">
+      <Button
+        onClick={isActiveVisit ? cancelVisit : deleteVisit}
+        kind="danger--ghost"
+        renderIcon={TrashCanIcon}
+        size={isTablet ? 'lg' : 'sm'}
+      >
+        {isActiveVisit ? t('cancelVisit', 'Cancel visit') : t('deleteVisit', 'Delete visit')}
+      </Button>
+    </UserHasAccess>
+  );
+};
+
+export default DeleteVisitActionItem;

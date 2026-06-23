@@ -1,0 +1,73 @@
+{
+  "name": "@sihsalus/esm-patient-chart-app",
+  "version": "1.0.0-alpha",
+  "license": "MPL-2.0",
+  "description": "Patient dashboard microfrontend for the OpenMRS SPA",
+  "browser": "dist/openmrs-esm-patient-chart-app.js",
+  "main": "src/index.ts",
+  "source": true,
+  "scripts": {
+    "start": "openmrs develop",
+    "serve": "rspack serve --mode=development",
+    "debug": "yarn serve",
+    "build": "rspack --mode=production",
+    "analyze": "rspack --mode=production --env analyze=true",
+    "lint": "node ../../tooling/scripts/run-biome.js lint .",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest watch",
+    "coverage": "vitest run --coverage --passWithNoTests",
+    "typescript": "tsc --noEmit",
+    "extract-translations": "i18next 'src/**/*.{ts,tsx}' '!src/**/*.test.{ts,tsx}' '!src/**/*.spec.{ts,tsx}' --config ../../tooling/scripts/i18next-parser.config.js"
+  },
+  "browserslist": [
+    "extends browserslist-config-openmrs"
+  ],
+  "keywords": [
+    "openmrs",
+    "microfrontends",
+    "SIHSALUS"
+  ],
+  "homepage": "https://github.com/PROYECTO-SANTACLOTILDE/openmrs-esm-patient-chart#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PROYECTO-SANTACLOTILDE/openmrs-esm-patient-chart.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PROYECTO-SANTACLOTILDE/openmrs-esm-patient-chart/issues"
+  },
+  "dependencies": {
+    "@openmrs/esm-utils": "workspace:*",
+    "@sihsalus/esm-rbac": "workspace:*",
+    "lodash-es": "^4.17.21",
+    "uuid": "^14.0.0"
+  },
+  "peerDependencies": {
+    "@carbon/react": "1.x",
+    "@openmrs/esm-extensions": "*",
+    "@openmrs/esm-framework": "*",
+    "@openmrs/esm-patient-common-lib": "*",
+    "@openmrs/esm-styleguide": "*",
+    "dayjs": "1.x",
+    "lodash-es": "4.x",
+    "react": "18.x",
+    "react-i18next": "16.x",
+    "react-router-dom": "6.x",
+    "rxjs": "6.x",
+    "single-spa": "6.x",
+    "single-spa-react": "6.x",
+    "swr": "2.x"
+  },
+  "devDependencies": {
+    "@openmrs/esm-extensions": "workspace:*",
+    "@openmrs/esm-styleguide": "workspace:*",
+    "@rspack/cli": "1.7.11",
+    "@types/uuid": "^9.0.4",
+    "eslint": "^10.2.0",
+    "openmrs": "workspace:*",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.7"
+  }
+}

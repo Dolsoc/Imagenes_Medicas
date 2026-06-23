@@ -1,0 +1,228 @@
+import {
+  Button,
+  DataTable,
+  DataTableSkeleton,
+  InlineLoading,
+  InlineNotification,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@carbon/react';
+import {
+  AddIcon,
+  type ConfigObject,
+  isDesktop as desktopLayout,
+  formatDate,
+  formatDatetime,
+  useConfig,
+  useLayoutType,
+  usePagination,
+} from '@openmrs/esm-framework';
+import {
+  CardHeader,
+  EmptyState,
+  ErrorState,
+  launchPatientWorkspace,
+  PatientChartPagination,
+} from '@openmrs/esm-patient-common-lib';
+import classNames from 'classnames';
+import React, { type ComponentProps, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { type ConfigurableProgram } from '../types';
+import { getProgramNavigationHref } from './program-navigation';
+import { findLastState, usePrograms } from './programs.resource';
+import { ProgramsActionMenu } from './programs-action-menu.component';
+import styles from './programs-overview.scss';
+
+interface ProgramsOverviewProps {
+  basePath: string;
+  patientUuid: string;
+}
+
+const ProgramsOverview: React.FC<ProgramsOverviewProps> = ({ basePath: _basePath, patientUuid }) => {
+  const programsCount = 5;
+  const { t } = useTranslation();
+  const config = useConfig<ConfigObject>();
+  const hideAddProgramButton = config?.hideAddProgramButton ?? false;
+  const programNavigationTargets = config?.programNavigationTargets ?? [];
+  const displayText = t('programEnrollmentsLower', 'program enrollments');
+  const headerTitle = t('carePrograms', 'Care Programs');
+  const urlLabel = t('seeAll', 'See all');
+  const pageUrl = `${globalThis.spaBase}/patient/${patientUuid}/chart/Programs`;
+  const layout = useLayoutType();
+  const isTablet = layout === 'tablet';
+  const _isDesktop = desktopLayout(layout);
+
+  const {
+    activeEnrollments: _activeEnrollments,
+    availablePrograms,
+    eligiblePrograms,
+    enrollments,
+    error,
+    isLoading,
+    isValidating,
+  } = usePrograms(patientUuid);
+
+  const { results: paginatedEnrollments, goTo, currentPage } = usePagination(enrollments ?? [], programsCount);
+
+  const enrollmentsByUuid = useMemo(
+    () => new Map(paginatedEnrollments?.map((enrollment) => [enrollment.uuid, enrollment]) ?? []),
+    [paginatedEnrollments],
+  );
+
+  const launchProgramsForm = useCallback(() => launchPatientWorkspace('programs-form-workspace'), []);
+
+  const renderProgramNavigationLink = useCallback(
+    (programUuid: string | null | undefined) => {
+      const href = getProgramNavigationHref(patientUuid, programUuid, programNavigationTargets);
+
+      return href ? <a href={href}>{t('goTo', 'Go to')}</a> : '--';
+    },
+    [patientUuid, programNavigationTargets, t],
+  );
+
+  const tableHeaders = [
+    {
+      key: 'display',
+      header: t('activePrograms', 'Active programs'),
+    },
+    {
+      key: 'location',
+      header: t('location', 'Location'),
+    },
+    {
+      key: 'dateEnrolled',
+      header: t('dateEnrolled', 'Date enrolled'),
+    },
+    {
+      key: 'status',
+      header: t('status', 'Status'),
+    },
+    {
+      key: 'state',
+      header: t('state', 'State'),
+    },
+    {
+      key: 'goTo',
+      header: t('goTo', 'Go to'),
+    },
+  ];
+
+  const tableRows = useMemo(() => {
+    return paginatedEnrollments?.map((enrollment: ConfigurableProgram) => {
+      const state = enrollment ? findLastState(enrollment.states ?? []) : null;
+      return {
+        id: enrollment.uuid,
+        display: enrollment.display,
+        location: enrollment.location?.display ?? '--',
+        dateEnrolled: enrollment.dateEnrolled ? formatDatetime(new Date(enrollment.dateEnrolled)) : '--',
+        status: enrollment.dateCompleted
+          ? `${t('completedOn', 'Completed On')} ${formatDate(new Date(enrollment.dateCompleted))}`
+          : t('active', 'Active'),
+        state: state ? state.state.concept.display : '--',
+        goTo: '',
+      };
+    });
+  }, [paginatedEnrollments, t]);
+
+  if (isLoading) {
+    return <DataTableSkeleton role="progressbar" zebra />;
+  }
+
+  if (error) {
+    return <ErrorState error={error} headerTitle={headerTitle} />;
+  }
+
+  if (enrollments?.length) {
+    return (
+      <div className={styles.widgetCard}>
+        <CardHeader title={headerTitle}>
+          <span>{isValidating ? <InlineLoading /> : null}</span>
+          {hideAddProgramButton ? null : (
+            <Button
+              kind="ghost"
+              renderIcon={(props: ComponentProps<typeof AddIcon>) => <AddIcon size={16} {...props} />}
+              iconDescription="Add programs"
+              onClick={launchProgramsForm}
+              disabled={Boolean(availablePrograms?.length && eligiblePrograms?.length === 0)}
+            >
+              {t('add', 'Add')}
+            </Button>
+          )}
+        </CardHeader>
+        {availablePrograms?.length && eligiblePrograms?.length === 0 && (
+          <InlineNotification
+            style={{ minWidth: '100%', margin: '0', padding: '0' }}
+            kind={'info'}
+            lowContrast
+            subtitle={t('noEligibleEnrollments', 'There are no more programs left to enroll this patient in')}
+            title={t('noEligiblePrograms', 'No eligible programs available')}
+          />
+        )}
+        <DataTable rows={tableRows} headers={tableHeaders} isSortable size={isTablet ? 'lg' : 'sm'} useZebraStyles>
+          {({ rows, headers, getHeaderProps, getRowProps, getTableProps }) => (
+            <TableContainer>
+              <Table aria-label="programs overview" {...getTableProps()}>
+                <TableHead>
+                  <TableRow>
+                    {headers.map((header) => (
+                      <TableHeader
+                        key={header.key}
+                        className={classNames(styles.productiveHeading01, styles.text02)}
+                        {...getHeaderProps({
+                          header,
+                        })}
+                      >
+                        {header.header}
+                      </TableHeader>
+                    ))}
+                    <TableHeader />
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((row) => {
+                    const enrollment = enrollmentsByUuid.get(row.id);
+
+                    return (
+                      <TableRow key={row.id} {...getRowProps({ row })}>
+                        {row.cells.map((cell) => (
+                          <TableCell key={cell.id}>
+                            {cell.info.header === 'goTo'
+                              ? renderProgramNavigationLink(enrollment?.program?.uuid)
+                              : (cell.value?.content ?? cell.value)}
+                          </TableCell>
+                        ))}
+                        {enrollment && (
+                          <TableCell className="cds--table-column-menu">
+                            <ProgramsActionMenu patientUuid={patientUuid} programEnrollmentId={enrollment.uuid} />
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </DataTable>
+        <PatientChartPagination
+          currentItems={paginatedEnrollments.length}
+          onPageNumberChange={({ page }) => goTo(page)}
+          pageNumber={currentPage}
+          pageSize={programsCount}
+          totalItems={enrollments?.length}
+          dashboardLinkUrl={pageUrl}
+          dashboardLinkLabel={urlLabel}
+        />
+      </div>
+    );
+  }
+
+  return <EmptyState displayText={displayText} headerTitle={headerTitle} launchForm={launchProgramsForm} />;
+};
+
+export default ProgramsOverview;

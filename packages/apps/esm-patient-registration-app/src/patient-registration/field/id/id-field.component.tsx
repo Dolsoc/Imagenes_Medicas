@@ -1,0 +1,254 @@
+import { Button, InlineNotification, SkeletonText } from '@carbon/react';
+import { ArrowRight, TrashCan } from '@carbon/react/icons';
+import { isDesktop, UserHasAccess, useConfig, useLayoutType } from '@openmrs/esm-framework';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { type RegistrationConfig } from '../../../config-schema';
+import { moduleName } from '../../../constants';
+import { ResourcesContext } from '../../../offline.resources';
+import IdentifierInput from '../../input/custom-input/identifier/identifier-input.component';
+import type {
+  FormValues,
+  IdentifierSource,
+  PatientIdentifierType,
+  PatientIdentifierValue,
+} from '../../patient-registration.types';
+import { PatientRegistrationContext } from '../../patient-registration-context';
+import { getEffectiveRegistrationConfig } from '../../peru-registration-config';
+import styles from '../field.scss';
+import IdentifierSelectionOverlay from './identifier-selection-overlay.component';
+
+export function setIdentifierSource(
+  identifierSource: IdentifierSource,
+  identifierValue: string,
+  initialValue: string,
+): {
+  identifierValue: string;
+  autoGeneration: boolean;
+  selectedSource: IdentifierSource;
+} {
+  const autoGeneration = identifierSource?.autoGenerationOption?.automaticGenerationEnabled;
+  const manualEntryEnabled = identifierSource?.autoGenerationOption?.manualEntryEnabled;
+  return {
+    selectedSource: identifierSource,
+    autoGeneration,
+    identifierValue:
+      autoGeneration && !manualEntryEnabled
+        ? 'auto-generated'
+        : identifierValue !== 'auto-generated'
+          ? identifierValue
+          : initialValue,
+  };
+}
+
+export function initializeIdentifier(identifierType: PatientIdentifierType, identifierProps): PatientIdentifierValue {
+  return {
+    identifierTypeUuid: identifierType.uuid,
+    identifierName: identifierType.name,
+    preferred: identifierType.isPrimary,
+    initialValue: '',
+    required: identifierType.isPrimary || identifierType.required,
+    ...identifierProps,
+    ...setIdentifierSource(
+      identifierProps?.selectedSource ?? identifierType.identifierSources?.[0],
+      identifierProps?.identifierValue,
+      identifierProps?.initialValue ?? '',
+    ),
+  };
+}
+
+export function isIdentityDocumentIdentifier(
+  identifiers: FormValues['identifiers'],
+  identifierFieldName: string,
+  identifierTypes: Array<PatientIdentifierType> = [],
+) {
+  const identifier = identifiers?.[identifierFieldName];
+  const identifierType = identifierTypes.find(
+    (type) => type.fieldName === identifierFieldName || type.uuid === identifier?.identifierTypeUuid,
+  );
+
+  return identifierType ? !identifierType.isPrimary && !identifierType.required : !identifier?.required;
+}
+
+export function countIdentityDocumentIdentifiers(
+  identifiers: FormValues['identifiers'],
+  identifierTypes: Array<PatientIdentifierType> = [],
+) {
+  return Object.keys(identifiers ?? {}).filter((fieldName) =>
+    isIdentityDocumentIdentifier(identifiers, fieldName, identifierTypes),
+  ).length;
+}
+
+export function deleteIdentifierType(
+  identifiers: FormValues['identifiers'],
+  identifierFieldName,
+  identifierTypes: Array<PatientIdentifierType> = [],
+) {
+  if (
+    isIdentityDocumentIdentifier(identifiers, identifierFieldName, identifierTypes) &&
+    countIdentityDocumentIdentifiers(identifiers, identifierTypes) <= 1
+  ) {
+    return identifiers;
+  }
+
+  return Object.fromEntries(Object.entries(identifiers).filter(([fieldName]) => fieldName !== identifierFieldName));
+}
+
+export const Identifiers: React.FC = () => {
+  const { identifierTypes = [], identifierTypesError, isLoadingIdentifierTypes } = useContext(ResourcesContext);
+  const isLoading = isLoadingIdentifierTypes && !identifierTypes.length;
+  const { values, setFieldValue, initialFormValues, isOffline } = useContext(PatientRegistrationContext);
+  const hasSelectedIdentifiers = Object.keys(values.identifiers ?? {}).length > 0;
+  const hasUnavailableIdentifierTypes = !isLoading && !identifierTypes.length;
+  const { t } = useTranslation(moduleName);
+  const layout = useLayoutType();
+  const [showIdentifierOverlay, setShowIdentifierOverlay] = useState(false);
+  const config = getEffectiveRegistrationConfig(useConfig() as RegistrationConfig);
+  const { defaultPatientIdentifierTypes } = config;
+
+  useEffect(() => {
+    if (identifierTypes) {
+      const identifiers = {};
+
+      identifierTypes
+        .filter(
+          (type) =>
+            type.isPrimary ||
+            type.required ||
+            (!hasSelectedIdentifiers &&
+              !!defaultPatientIdentifierTypes?.find(
+                (defaultIdentifierTypeUuid) => defaultIdentifierTypeUuid === type.uuid,
+              )),
+        )
+        .filter((type) => !values.identifiers[type.fieldName])
+        .forEach((type) => {
+          identifiers[type.fieldName] = initializeIdentifier(
+            type,
+            values.identifiers[type.fieldName] ?? initialFormValues.identifiers[type.fieldName] ?? {},
+          );
+        });
+
+      if (Object.keys(identifiers).length) {
+        setFieldValue('identifiers', {
+          ...values.identifiers,
+          ...identifiers,
+        });
+      }
+    }
+  }, [
+    identifierTypes,
+    setFieldValue,
+    defaultPatientIdentifierTypes,
+    values.identifiers,
+    initialFormValues.identifiers,
+    hasSelectedIdentifiers,
+  ]);
+
+  const closeIdentifierSelectionOverlay = useCallback(() => setShowIdentifierOverlay(false), []);
+
+  const removeIdentifier = useCallback(
+    (identifierFieldName: string) => {
+      setFieldValue('identifiers', deleteIdentifierType(values.identifiers, identifierFieldName, identifierTypes));
+    },
+    [identifierTypes, setFieldValue, values.identifiers],
+  );
+
+  if (isLoading && !isOffline) {
+    return (
+      <div className={styles.halfWidthInDesktopView}>
+        <div className={styles.identifierLabelText}>
+          <h4 className={styles.productiveHeading02Light}>{t('idFieldLabelText', 'Identifiers')}</h4>
+        </div>
+        <div role="progressbar">
+          <SkeletonText />
+        </div>
+      </div>
+    );
+  }
+
+  if (hasUnavailableIdentifierTypes && !isOffline && !hasSelectedIdentifiers) {
+    return (
+      <div className={styles.halfWidthInDesktopView}>
+        <div className={styles.identifierLabelText}>
+          <h4 className={styles.productiveHeading02Light}>{t('idFieldLabelText', 'Identifiers')}</h4>
+        </div>
+        <InlineNotification
+          style={{ margin: '0', minWidth: '100%' }}
+          kind={identifierTypesError ? 'error' : 'warning'}
+          lowContrast={true}
+          title={t('identifierTypesUnavailableTitle', 'Identification data unavailable')}
+          subtitle={t(
+            'identifierTypesUnavailableSubtitle',
+            'Refresh the page. If the problem continues, check that patient identifier types are configured and that your session is active.',
+          )}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.halfWidthInDesktopView}>
+      {hasUnavailableIdentifierTypes && !isOffline ? (
+        <InlineNotification
+          style={{ margin: '0 0 1rem', minWidth: '100%' }}
+          kind={identifierTypesError ? 'error' : 'warning'}
+          lowContrast={true}
+          title={t('identifierTypesUnavailableTitle', 'Identification data unavailable')}
+          subtitle={t(
+            'identifierTypesEditModeUnavailableSubtitle',
+            'Existing identification data is shown, but identifier types are unavailable. Refresh the page before adding or changing identifiers.',
+          )}
+        />
+      ) : null}
+      <UserHasAccess privilege={['Get Identifier Types', 'Add patient identifiers']}>
+        <div className={styles.identifierLabelText}>
+          <h4 className={styles.productiveHeading02Light}>{t('idFieldLabelText', 'Identifiers')}</h4>
+          {identifierTypes.length ? (
+            <Button
+              kind="ghost"
+              className={styles.configureIdentifiersButton}
+              onClick={() => setShowIdentifierOverlay(true)}
+              size={isDesktop(layout) ? 'sm' : 'md'}
+            >
+              {t('configure', 'Configure')} <ArrowRight className={styles.arrowRightIcon} size={16} />
+            </Button>
+          ) : null}
+        </div>
+      </UserHasAccess>
+      <div className={styles.identifierFieldsGrid}>
+        {Object.keys(values.identifiers).map((fieldName) => {
+          const patientIdentifierWithRequired = {
+            ...values.identifiers[fieldName],
+            required: true,
+          };
+
+          const canRemove =
+            isIdentityDocumentIdentifier(values.identifiers, fieldName, identifierTypes) &&
+            countIdentityDocumentIdentifiers(values.identifiers, identifierTypes) > 1;
+
+          return (
+            <div key={fieldName} className={styles.identifierFieldRow}>
+              <IdentifierInput fieldName={fieldName} patientIdentifier={patientIdentifierWithRequired} />
+              {canRemove && (
+                <Button
+                  className={styles.deleteIdentifierButton}
+                  kind="ghost"
+                  hasIconOnly
+                  size="md"
+                  onClick={() => removeIdentifier(fieldName)}
+                  iconDescription={t('deleteIdentifierTooltip', 'Delete')}
+                >
+                  <TrashCan size={16} />
+                </Button>
+              )}
+            </div>
+          );
+        })}
+
+        {showIdentifierOverlay && identifierTypes.length ? (
+          <IdentifierSelectionOverlay setFieldValue={setFieldValue} closeOverlay={closeIdentifierSelectionOverlay} />
+        ) : null}
+      </div>
+    </div>
+  );
+};

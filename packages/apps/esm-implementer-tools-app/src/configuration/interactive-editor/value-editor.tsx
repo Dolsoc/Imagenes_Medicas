@@ -1,0 +1,90 @@
+import { Button } from '@carbon/react';
+import { CloseIcon, type Config, type ConfigSchema, getCoreTranslation, SaveIcon, Type } from '@openmrs/esm-framework';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import type { ConfigValueDescriptor } from './editable-value.component';
+import { validateValue } from './validators.resource';
+import styles from './value-editor.styles.scss';
+import { ValueEditorField } from './value-editors/value-editor-field';
+
+export type CustomValueType = 'add' | 'remove' | 'order' | 'configure';
+
+export type ValueType = CustomValueType | Type;
+
+interface ValueEditorProps {
+  element: ConfigValueDescriptor;
+  customType?: CustomValueType;
+  path: Array<string>;
+  handleSaveToConfiguration: (val: string) => void;
+  handleClose: () => void;
+}
+
+export function ValueEditor({ element, customType, path, handleSaveToConfiguration, handleClose }: ValueEditorProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [tmpValue, setTmpValue] = useState(element._value);
+  const [error, setError] = useState<string | null>(null);
+
+  const valueType = customType ?? element._type;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const validators = element._validators ?? [];
+
+  let elementSchema: ConfigValueDescriptor | Config | undefined;
+  if (valueType === Type.Object) {
+    elementSchema = element;
+  } else if (valueType === Type.Array) {
+    elementSchema = element._elements;
+  }
+
+  const handleSave = useCallback(() => {
+    const errorMessage = validateValue(tmpValue, valueType, validators, elementSchema as ConfigSchema);
+    if (errorMessage) {
+      setError(errorMessage);
+    } else {
+      setError(null);
+      handleSaveToConfiguration(JSON.stringify(tmpValue));
+    }
+  }, [tmpValue, valueType, validators, elementSchema, handleSaveToConfiguration]);
+
+  useEffect(() => {
+    const keyListener = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose();
+      } else if (e.key === 'Enter') {
+        handleSave();
+      }
+    };
+
+    document.addEventListener('keyup', keyListener);
+    return () => {
+      document.removeEventListener('keyup', keyListener);
+    };
+  }, [handleSave, handleClose]);
+
+  return (
+    <div ref={ref}>
+      <ValueEditorField
+        element={element}
+        path={path}
+        value={tmpValue}
+        onChange={setTmpValue}
+        valueType={valueType}
+        error={error}
+      />
+      <div className={styles.errorMessage}>
+        {valueType !== Type.Number &&
+          valueType !== Type.String &&
+          valueType !== Type.UUID &&
+          valueType !== Type.Boolean &&
+          error}
+      </div>
+      <div className={styles.valueEditorButtons}>
+        <Button renderIcon={(props) => <SaveIcon {...props} size={16} />} kind="primary" onClick={handleSave}>
+          {getCoreTranslation('save')}
+        </Button>
+        <Button renderIcon={(props) => <CloseIcon {...props} size={16} />} kind="secondary" onClick={handleClose}>
+          {getCoreTranslation('cancel')}
+        </Button>
+      </div>
+    </div>
+  );
+}

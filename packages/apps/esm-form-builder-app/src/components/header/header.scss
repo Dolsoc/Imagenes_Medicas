@@ -1,0 +1,54 @@
+@use '@carbon/layout';
+@use '@carbon/type';
+@use '@openmrs/esm-styleguide/src/vars' as *;
+
+.header {
+  border-bottom: 1px solid $ui-03;
+}
+
+.leftJustifiedItems {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.pageLabels {
+  margin: layout.$spacing-03;
+
+  p:first-of-type {
+    margin-bottom: layout.$spacing-02;
+  }
+}
+
+.pageName {
+  @include type.type-style('heading-04');
+}
+
+.rightJustifiedItems {
+  @include type.type-style('body-compact-02');
+  color: $text-02;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.dateAndLocation {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.userContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: layout.$spacing-05;
+}
+
+.value {
+  margin-left: layout.$spacing-02;
+}
+
+.middot {
+  margin: 0 layout.$spacing-03;
+}

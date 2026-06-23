@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "webservices.rest": ">=2.2.0"
+  },
+  "pages": [
+    {
+      "component": "root",
+      "route": "fua-request"
+    },
+    {
+      "component": "fuaViewerPage",
+      "route": "fua-viewer"
+    }
+  ],
+  "extensions": [
+    {
+      "name": "fua-dashboard",
+      "slot": "fua-dashboard-slot",
+      "component": "root",
+      "privileges": "Read Fua"
+    },
+    {
+      "name": "fua-dashboard-link",
+      "slot": "homepage-dashboard-slot",
+      "component": "fuaDashboardLink",
+      "privileges": "Read Fua",
+      "meta": {
+        "name": "fua-request",
+        "slot": "fua-dashboard-slot",
+        "title": "fua"
+      },
+      "order": 50
+    },
+    {
+      "name": "all-fua-requests-tile",
+      "component": "allFuaRequestsTile",
+      "slot": "fua-tiles-slot",
+      "privileges": "Read Fua",
+      "order": 2,
+      "meta": {
+        "name": "allFuasRequestsTileSlot",
+        "title": "fuasRequested"
+      }
+    },
+    {
+      "name": "in-progress-fua-requests-tile",
+      "component": "inProgressFuaRequestsTile",
+      "slot": "fua-tiles-slot",
+      "privileges": "Read Fua",
+      "order": 0,
+      "meta": {
+        "name": "inProgressTileSlot",
+        "title": "activeFuas"
+      }
+    },
+    {
+      "name": "completed-fua-requests-tile",
+      "component": "completedFuaRequestsTile",
+      "slot": "fua-tiles-slot",
+      "privileges": "Read Fua",
+      "order": 1,
+      "meta": {
+        "name": "completedTileSlot",
+        "title": "completed"
+      }
+    },
+    {
+      "name": "enviado-fua-requests-tile",
+      "component": "enviadoFuaRequestsTile",
+      "slot": "fua-tiles-slot",
+      "privileges": "Read Fua",
+      "order": 3,
+      "meta": {
+        "name": "enviadoTileSlot",
+        "title": "sentFuas"
+      }
+    },
+    {
+      "name": "all-fua-requests-panel",
+      "component": "allFuaRequestsTable",
+      "slot": "fua-panels-slot",
+      "privileges": "Read Fua",
+      "order": 2,
+      "meta": {
+        "name": "allFuasPanel",
+        "title": "fuasRequested"
+      }
+    },
+    {
+      "name": "in-progress-fua-requests-panel",
+      "component": "inProgressFuaRequestsTable",
+      "slot": "fua-panels-slot",
+      "privileges": "Read Fua",
+      "order": 0,
+      "meta": {
+        "name": "inProgressPanel",
+        "title": "activeFuas"
+      }
+    },
+    {
+      "name": "completed-fua-requests-panel",
+      "component": "completedFuaRequestsTable",
+      "slot": "fua-panels-slot",
+      "privileges": "Read Fua",
+      "order": 1,
+      "meta": {
+        "name": "completedPanel",
+        "title": "completed"
+      }
+    },
+    {
+      "name": "envio-fuas-panel",
+      "component": "envioFuasTable",
+      "slot": "fua-panels-slot",
+      "privileges": "Read Fua",
+      "order": 3,
+      "meta": {
+        "name": "envioFuasPanel",
+        "title": "sentFuas"
+      }
+    }
+  ],
+  "workspaces2": [
+    {
+      "name": "fua-encounter-workspace",
+      "component": "fuaEncounterWorkspace",
+      "window": "patient-chart-fua"
+    },
+    {
+      "name": "fua-viewer-workspace",
+      "component": "fuaViewerWorkspace",
+      "window": "patient-chart-fua"
+    }
+  ],
+  "workspaceWindows2": [
+    {
+      "name": "patient-chart-fua",
+      "group": "patient-chart",
+      "icon": "fuaEncounterActionButton",
+      "width": "extra-wide",
+      "order": 4
+    }
+  ],
+  "modals": [
+    {
+      "name": "change-fua-status-modal",
+      "component": "changeFuaStatusModal"
+    },
+    {
+      "name": "cancel-fua-modal",
+      "component": "cancelFuaModal"
+    },
+    {
+      "name": "fua-historial-modal",
+      "component": "fuaHistorialModal"
+    }
+  ]
+}

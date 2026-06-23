@@ -1,0 +1,429 @@
+/* biome-ignore-all lint/correctness/noUnknownPseudoClass: :global() keeps literal tim-* class names compatible with CSS Modules. */
+
+/* =========================================================================
+   ToothInfoModal — modal de detalle del diente
+   ========================================================================= */
+
+/* Backdrop */
+:global(.tim-backdrop) {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: tim-fade-in 0.15s ease;
+}
+@keyframes tim-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal card */
+:global(.tim-modal) {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+  width: 420px;
+  max-width: 94vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: tim-slide-up 0.18s ease;
+}
+@keyframes tim-slide-up {
+  from {
+    transform: translateY(12px);
+    opacity: 0.5;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Header */
+:global(.tim-header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 14px 14px 0 0;
+}
+:global(.tim-header-left) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+:global(.tim-tooth-id) {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+:global(.tim-finding-count) {
+  font-size: 12px;
+  color: #64748b;
+  background: #e2e8f0;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+:global(.tim-close) {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #94a3b8;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+:global(.tim-close:hover) {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+/* Body */
+:global(.tim-body) {
+  padding: 16px 20px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Overview section */
+:global(.tim-overview) {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+:global(.tim-tooth-preview) {
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px;
+  background: #fafbfc;
+}
+:global(.tim-annotations) {
+  flex: 1;
+  min-width: 0;
+}
+:global(.tim-section-label) {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  display: block;
+}
+:global(.tim-annotation-chips) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+:global(.tim-annotation-chip) {
+  font-size: 12px;
+  font-weight: 700;
+  background: #f1f5f9;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+/* Empty state */
+:global(.tim-empty) {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 14px;
+  padding: 24px 0;
+}
+
+/* Findings list */
+:global(.tim-findings-list) {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+:global(.tim-finding-group) {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+:global(.tim-group-header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+}
+:global(.tim-group-name) {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+:global(.tim-group-count) {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  background: #e2e8f0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Finding row */
+:global(.tim-finding-row) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid #f8fafc;
+  transition: background 0.12s;
+}
+:global(.tim-finding-row:last-child) {
+  border-bottom: none;
+}
+:global(.tim-finding-row:hover) {
+  background: #fafbfc;
+}
+:global(.tim-finding-row--confirm) {
+  background: #fef2f2;
+}
+:global(.tim-finding-info) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+:global(.tim-design-preview) {
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fafbfc;
+}
+:global(.tim-finding-meta) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+:global(.tim-meta-tag) {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 2px 7px;
+  border-radius: 5px;
+}
+:global(.tim-meta-tag--tipo) {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+:global(.tim-meta-color) {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #64748b;
+}
+:global(.tim-color-dot) {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--dot-color, #888);
+  flex-shrink: 0;
+}
+
+/* Actions */
+:global(.tim-finding-actions) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+:global(.tim-confirm-label) {
+  font-size: 12px;
+  font-weight: 600;
+  color: #dc2626;
+  white-space: nowrap;
+}
+
+/* Buttons */
+:global(.tim-btn) {
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  transition: all 0.12s;
+}
+:global(.tim-btn--remove) {
+  background: #f1f5f9;
+  color: #94a3b8;
+  font-size: 16px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+:global(.tim-btn--remove:hover) {
+  background: #fee2e2;
+  color: #dc2626;
+}
+:global(.tim-btn--danger) {
+  background: #dc2626;
+  color: #fff;
+}
+:global(.tim-btn--danger:hover) {
+  background: #b91c1c;
+}
+:global(.tim-btn--cancel) {
+  background: #e2e8f0;
+  color: #475569;
+}
+:global(.tim-btn--cancel:hover) {
+  background: #cbd5e1;
+}
+:global(.tim-btn--undo) {
+  background: #4f46e5;
+  color: #fff;
+}
+:global(.tim-btn--undo:hover) {
+  background: #4338ca;
+}
+
+/* Ghost (just-deleted) row */
+:global(.tim-finding-row--ghost) {
+  opacity: 0.55;
+  background: #fef9ec;
+  border-bottom: 1px dashed #fde68a;
+}
+:global(.tim-finding-group--ghost) {
+  border-color: #fde68a;
+}
+:global(.tim-finding-group--ghost .tim-group-header) {
+  background: #fef9ec;
+}
+:global(.tim-group-count--ghost) {
+  background: #fde68a;
+  color: #92400e;
+}
+:global(.tim-ghost-label) {
+  font-size: 11px;
+  font-weight: 600;
+  color: #d97706;
+  white-space: nowrap;
+}
+
+/* Undo bar (legacy, kept for reference) */
+:global(.tim-undo-bar) {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #166534;
+  font-weight: 500;
+  animation: tim-fade-in 0.15s ease;
+}
+
+/* Tooth column wrapper — positioned relative for the info button */
+:global(.tim-tooth-col) {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Info button, badge and eye button — temporarily hidden.
+   Logic and DOM remain so we can re-enable a polished tooth-detail
+   entry point in a later iteration. */
+:global(.tim-info-btn),
+:global(.tim-badge),
+:global(.tim-eye-btn) {
+  display: none;
+}
+
+/* Mobile modal adjustments */
+@media (max-width: 480px) {
+  :global(.tim-modal) {
+    width: 100%;
+    max-width: 100vw;
+    max-height: 92vh;
+    border-radius: 14px 14px 0 0;
+    margin-top: auto;
+  }
+
+  :global(.tim-backdrop) {
+    align-items: flex-end;
+  }
+
+  :global(.tim-header) {
+    padding: 12px 14px;
+  }
+
+  :global(.tim-body) {
+    padding: 12px 14px 16px;
+  }
+
+  :global(.tim-overview) {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  :global(.tim-tooth-preview) {
+    align-self: center;
+  }
+
+  :global(.tim-finding-row) {
+    padding: 8px 10px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  :global(.tim-finding-info) {
+    min-width: 100%;
+  }
+
+  :global(.tim-finding-actions) {
+    margin-left: auto;
+  }
+}
+
+/* Landscape phone: reduce modal height */
+@media (max-height: 500px) and (orientation: landscape) {
+  :global(.tim-modal) {
+    max-height: 90vh;
+  }
+
+  :global(.tim-body) {
+    padding: 8px 14px 12px;
+  }
+}

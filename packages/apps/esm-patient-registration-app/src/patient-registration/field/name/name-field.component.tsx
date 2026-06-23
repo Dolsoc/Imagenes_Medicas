@@ -1,0 +1,182 @@
+import { ContentSwitcher, Switch } from '@carbon/react';
+import { ExtensionSlot, useConfig } from '@openmrs/esm-framework';
+import { useField } from 'formik';
+import { useCallback, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { type RegistrationConfig } from '../../../config-schema';
+import { moduleName } from '../../../constants';
+import { Input } from '../../input/basic-input/input/input.component';
+import { patientFamilyNameMaxLength, patientGivenNameMaxLength } from '../../patient-name-limits';
+import { PatientRegistrationContext } from '../../patient-registration-context';
+import { getEffectiveRegistrationConfig } from '../../peru-registration-config';
+import styles from '../field.scss';
+
+const containsNoNumbers = /^([^0-9]*)$/;
+
+function checkNumber(value: string) {
+  if (!containsNoNumbers.test(value)) {
+    return 'numberInNameDubious';
+  }
+
+  return undefined;
+}
+
+export const NameField = () => {
+  const { t } = useTranslation(moduleName);
+  const { setCapturePhotoProps, currentPhoto, setFieldValue, setFieldTouched } = useContext(PatientRegistrationContext);
+  const {
+    fieldConfigurations: {
+      name: {
+        displayCapturePhoto,
+        allowUnidentifiedPatients,
+        defaultUnknownGivenName,
+        defaultUnknownFamilyName,
+        defaultUnknownFamilyName2,
+        unidentifiedPatientAttributeTypeUuid,
+        displayMiddleName,
+        displayReverseFieldOrder,
+        requireFamilyName2,
+      },
+    },
+  } = getEffectiveRegistrationConfig(useConfig<RegistrationConfig>());
+
+  const [{ value: isPatientUnknownValue }, , { setValue: setUnknownPatient }] = useField<string>(
+    `attributes.${unidentifiedPatientAttributeTypeUuid}`,
+  );
+  /* console.log("defaultUnknownGivenName: " + defaultUnknownGivenName)
+  console.log("defaultUnknownFamilyName: " + defaultUnknownFamilyName)
+  console.log("defaultUnknownFamilyName2: " + defaultUnknownFamilyName2)
+ */
+  const isPatientUnknown = isPatientUnknownValue === 'true';
+
+  const onCapturePhoto = useCallback(
+    (dataUri: string, photoDateTime: string) => {
+      if (setCapturePhotoProps) {
+        setCapturePhotoProps({
+          imageData: dataUri,
+          dateTime: photoDateTime,
+        });
+        setFieldTouched('photo', true, false);
+      }
+    },
+    [setCapturePhotoProps, setFieldTouched],
+  );
+
+  const onClearPhoto = useCallback(() => {
+    setCapturePhotoProps?.(null);
+    setFieldTouched('photo', true, false);
+  }, [setCapturePhotoProps, setFieldTouched]);
+
+  const toggleNameKnown = (e) => {
+    if (e.name === 'known') {
+      setFieldValue('givenName', '');
+      setFieldValue('familyName', '');
+      setFieldValue('familyName2', '');
+      setUnknownPatient('false');
+    } else {
+      setFieldValue('givenName', defaultUnknownGivenName);
+      setFieldValue('familyName', defaultUnknownFamilyName);
+      setFieldValue('familyName2', defaultUnknownFamilyName2);
+      setUnknownPatient('true');
+    }
+    setFieldTouched('givenName', true);
+    setFieldTouched('familyName', true);
+    setFieldTouched('familyName2', true);
+    setFieldTouched(`attributes.${unidentifiedPatientAttributeTypeUuid}`, true, false);
+  };
+
+  const firstNameField = (
+    <Input
+      id="givenName"
+      name="givenName"
+      labelText={t('givenNameLabelText', 'First Name')}
+      checkWarning={checkNumber}
+      maxLength={patientGivenNameMaxLength}
+      required
+    />
+  );
+
+  const middleNameField = displayMiddleName && (
+    <Input
+      id="middleName"
+      name="middleName"
+      labelText={t('middleNameLabelText', 'Middle Name')}
+      checkWarning={checkNumber}
+      maxLength={patientGivenNameMaxLength}
+    />
+  );
+
+  const familyNameField = (
+    <Input
+      id="familyName"
+      name="familyName"
+      labelText={t('familyNameLabelText', 'Family Name')}
+      checkWarning={checkNumber}
+      maxLength={patientFamilyNameMaxLength}
+      required
+    />
+  );
+
+  const familyName2Field = (
+    <Input
+      id="familyName2"
+      name="familyName2"
+      labelText={t('familyName2LabelText', 'Second Family Name')}
+      checkWarning={checkNumber}
+      maxLength={patientFamilyNameMaxLength}
+      required={requireFamilyName2}
+    />
+  );
+
+  return (
+    <div className={styles.fullWidthInDesktopView}>
+      <h4 className={styles.productiveHeading02Light}>{t('fullNameLabelText', 'Full Name')}</h4>
+      <div className={styles.basicInfoNameLayout}>
+        <div className={styles.nameInputsPanel}>
+          {(allowUnidentifiedPatients || isPatientUnknown) && (
+            <div className={styles.nameKnownToggle}>
+              <div className={styles.dobContentSwitcherLabel}>
+                <span className={styles.label01}>{t('patientNameKnown', "Patient's Name is Known?")}</span>
+              </div>
+              <ContentSwitcher
+                className={styles.contentSwitcher}
+                selectedIndex={isPatientUnknown ? 1 : 0}
+                onChange={toggleNameKnown}
+              >
+                <Switch name="known" text={t('yes', 'Yes')} />
+                <Switch name="unknown" text={t('no', 'No')} />
+              </ContentSwitcher>
+            </div>
+          )}
+          {!isPatientUnknown && (
+            <div className={styles.nameFieldsGrid}>
+              {!displayReverseFieldOrder ? (
+                <>
+                  {firstNameField}
+                  {middleNameField}
+                  {familyNameField}
+                  {familyName2Field}
+                </>
+              ) : (
+                <>
+                  {familyNameField}
+                  {familyName2Field}
+                  {middleNameField}
+                  {firstNameField}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+        {displayCapturePhoto && (
+          <ExtensionSlot
+            className={styles.photoExtension}
+            name="capture-patient-photo-slot"
+            state={{ onCapturePhoto, onClearPhoto, initialState: currentPhoto }}
+          />
+        )}
+      </div>
+    </div>
+  );
+};

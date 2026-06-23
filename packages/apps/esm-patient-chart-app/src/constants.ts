@@ -1,0 +1,13 @@
+export const clinicalFormsWorkspace = 'clinical-forms-workspace';
+export const formEntryWorkspace = 'patient-form-entry-workspace';
+export const spaRoot = window['getOpenmrsSpaBase']();
+export const basePath = '/patient/:patientUuid/chart';
+export const dashboardPath = `${basePath}/:view/*`;
+export const spaBasePath = `${globalThis.spaBase}${basePath}`;
+export const adtPrivilege = 'app:adt';
+export const clinicalChartPrivilege = 'app:clinical.chart';
+export const clinicalChartVisitsEditPrivilege = 'app:clinical.chart.visits.edit';
+export const moduleName = '@sihsalus/esm-patient-chart-app';
+export const patientChartWorkspaceSlot = 'patient-chart-workspace-slot';
+export const patientChartWorkspaceHeaderSlot = 'patient-chart-workspace-header-slot';
+export const omrsDateFormat = 'YYYY-MM-DDTHH:mm:ss.SSSZZ';

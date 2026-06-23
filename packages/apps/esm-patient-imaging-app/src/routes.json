@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "fhir2": ">=1.2",
+    "webservices.rest": ">=2.24.0",
+    "imaging": ">=1.1.0"
+  },
+  "extensions": [
+    {
+      "name": "imaging-details-widget",
+      "component": "imagingDetailedSummary",
+      "slot": "patient-chart-imaging-dashboard-slot",
+      "privileges": "app:clinical.chart.imaging",
+      "online": true,
+      "offline": true,
+      "meta": {
+        "fullWidth": false
+      }
+    },
+    {
+      "name": "imaging-summary-dashboard",
+      "component": "imagingDashboardLink",
+      "slot": "patient-chart-dashboard-slot",
+      "privileges": "app:clinical.chart.imaging",
+      "online": true,
+      "offline": true,
+      "order": 23,
+      "meta": {
+        "slot": "patient-chart-imaging-dashboard-slot",
+        "columns": 1,
+        "columnSpan": 1,
+        "path": "Imaging",
+        "title": "Medical Imaging",
+        "icon": "omrs-icon-user-xray",
+        "layoutMode": "anchored",
+        "fullWidth": false
+      }
+    },
+    {
+      "name": "study-delete-confirmation-dialog",
+      "component": "studyDeleteConfirmationDialog",
+      "privileges": "app:clinical.chart.imaging.edit"
+    },
+    {
+      "name": "study-unlink-confirmation-dialog",
+      "component": "studyUnlinkConfirmationDialog",
+      "privileges": "app:clinical.chart.imaging.edit"
+    },
+    {
+      "name": "link-study-confirmation-dialog",
+      "component": "linkStudyConfirmationDialog",
+      "privileges": "app:clinical.chart.imaging.edit"
+    },
+    {
+      "name": "update-procedureStep-status-dialog",
+      "component": "rejectProcedureStepDialog",
+      "privileges": "app:clinical.chart.imaging.edit"
+    },
+    {
+      "name": "series-delete-confirmation-dialog",
+      "component": "seriesDeleteConfirmationDialog",
+      "privileges": "app:clinical.chart.imaging.edit"
+    },
+    {
+      "name": "request-delete-confirmation-dialog",
+      "component": "requestDeleteConfirmationDialog",
+      "privileges": "app:clinical.chart.imaging.edit"
+    },
+    {
+      "name": "procedureStep-delete-confirmation-dialog",
+      "component": "procedureSteptDeleteConfirmationDialog",
+      "privileges": "app:clinical.chart.imaging.edit"
+    },
+    {
+      "name": "instance-preview-dialog",
+      "component": "instancePreviewDialog",
+      "privileges": "app:clinical.chart.imaging"
+    }
+  ],
+
+  "workspaces": [
+    {
+      "name": "upload-studies-form-workspace",
+      "title": "Upload study",
+      "component": "uploadStudiesFormWorkspace",
+      "type": "form",
+      "privileges": "app:clinical.chart.imaging.edit"
+    },
+    {
+      "name": "link-studies-form-workspace",
+      "title": "Link studies",
+      "component": "linkStudiesFormWorkspace",
+      "type": "form",
+      "privileges": "app:clinical.chart.imaging.edit"
+    },
+    {
+      "name": "assign-studies-form-workspace",
+      "title": "Assign studies",
+      "component": "assignStudiesFormWorkspace",
+      "type": "form",
+      "privileges": "app:clinical.chart.imaging.edit",
+      "canMaximize": true,
+      "preferredWindowSize": "maximized"
+    },
+    {
+      "name": "add-request-form-workspace",
+      "title": "Add request",
+      "component": "addNewRequestWorkspace",
+      "type": "form",
+      "privileges": "app:clinical.chart.imaging.edit",
+      "canMaximize": true
+    },
+    {
+      "name": "add-procedureStep-form-workspace",
+      "title": "Add procedure step",
+      "component": "addNewProcedureStepWorkspace",
+      "type": "form",
+      "privileges": "app:clinical.chart.imaging.edit",
+      "canMaximize": true
+    }
+  ]
+}

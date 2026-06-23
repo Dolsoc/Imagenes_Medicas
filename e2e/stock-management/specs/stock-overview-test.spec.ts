@@ -1,0 +1,21 @@
+import { expect, test } from '@playwright/test';
+import dotenv from 'dotenv';
+import { getSpaUrl } from '../../utils/e2e-urls';
+import { HomePage } from '../pages';
+
+dotenv.config();
+
+//This is a sample test which can be deleted
+test.describe('Overview Page Test', () => {
+  test('should navigate to the Overview page and verify sections', async ({ page }) => {
+    const homePage = new HomePage(page);
+
+    await test.step('When I visit the home page', async () => {
+      await homePage.gotoHome();
+    });
+
+    await test.step('Then I should be at the home page', async () => {
+      await expect(page).toHaveURL(getSpaUrl('login'));
+    });
+  });
+});

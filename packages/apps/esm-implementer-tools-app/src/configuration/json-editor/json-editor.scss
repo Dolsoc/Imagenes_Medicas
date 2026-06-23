@@ -1,0 +1,25 @@
+@use '@carbon/colors';
+@use '@carbon/layout';
+
+.toolbar {
+  display: flex;
+  button {
+    background-color: var(--cds-button-primary, #0f62fe);
+    &:hover {
+      background-color: var(--cds-button-primary-hover, #0353e9);
+    }
+  }
+  background-color: var(--cds-layer-accent-01, #e0e0e0);
+}
+
+.alert {
+  color: white;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding-left: layout.$spacing-07;
+}
+
+.errorBackground {
+  background-color: colors.$red-60;
+}

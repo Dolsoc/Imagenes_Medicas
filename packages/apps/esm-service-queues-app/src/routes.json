@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "fhir2": ">=1.2",
+    "webservices.rest": ">=2.2.0",
+    "queue": ">=2.4.0"
+  },
+  "extensions": [
+    {
+      "name": "outpatient-side-nav-ext",
+      "component": "outpatientSideNav",
+      "slot": "outpatient-sidebar-slot",
+      "privileges": "app:service-queues",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "service-queues-dashboard-link",
+      "component": "serviceQueuesDashboardLink",
+      "slot": "homepage-dashboard-slot",
+      "meta": {
+        "name": "service-queues",
+        "slot": "service-queues-dashboard-slot",
+        "title": "serviceQueues"
+      },
+      "privileges": "app:service-queues",
+      "online": true,
+      "offline": true,
+      "order": 10
+    },
+    {
+      "name": "queue-table-by-status-menu-dashboard-link",
+      "component": "queueTableByStatusMenu",
+      "meta": {
+        "name": "service-queues",
+        "slot": "service-queues-dashboard-slot",
+        "title": "serviceQueues"
+      },
+      "privileges": "app:service-queues",
+      "online": true,
+      "offline": true
+    },
+    {
+      "component": "root",
+      "name": "service-queues-dashboard",
+      "slot": "service-queues-dashboard-slot",
+      "privileges": "app:service-queues"
+    },
+    {
+      "name": "remove-queue-entry",
+      "component": "removeQueueEntry",
+      "privileges": "app:service-queues"
+    },
+    {
+      "name": "clear-all-queue-entries",
+      "component": "clearAllQueueEntries",
+      "privileges": "app:service-queues"
+    },
+    {
+      "name": "previous-visit-summary-widget",
+      "component": "pastVisitSummary",
+      "slot": "previous-visit-summary-slot",
+      "privileges": "app:service-queues"
+    },
+    {
+      "name": "active-visits-row-actions",
+      "component": "activeVisitsRowActions",
+      "slot": "queue-table-serve-patient-slot",
+      "privileges": "app:service-queues"
+    },
+    {
+      "name": "visit-form-queue-fields",
+      "component": "visitFormQueueFields",
+      "slot": "visit-form-bottom-slot",
+      "privileges": "app:service-queues"
+    },
+    {
+      "name": "queue-patient-info-queue-entry-status",
+      "component": "patientBannerQueueEntryStatus",
+      "slot": "patient-banner-tags-slot",
+      "privileges": "app:service-queues"
+    }
+  ],
+  "modals": [
+    {
+      "name": "add-provider-to-room-modal",
+      "component": "addProviderToRoomModal"
+    },
+    {
+      "name": "edit-queue-entry-modal",
+      "component": "editQueueEntryModal"
+    },
+    {
+      "name": "edit-queue-entry-status-modal",
+      "component": "editQueueEntryStatusModal"
+    },
+    {
+      "name": "end-queue-entry-modal",
+      "component": "endQueueEntryModal"
+    },
+    {
+      "name": "transition-patient-to-latest-queue-modal",
+      "component": "transitionPatientToLatestQueue"
+    },
+    {
+      "name": "transition-queue-entry-modal",
+      "component": "transitionQueueEntryModal"
+    },
+    {
+      "name": "transition-queue-entry-status-modal",
+      "component": "transitionQueueEntryStatusModal"
+    },
+    {
+      "name": "undo-transition-queue-entry-modal",
+      "component": "undoTransitionQueueEntryModal"
+    },
+    {
+      "name": "void-queue-entry-modal",
+      "component": "voidQueueEntryModal"
+    }
+  ],
+  "workspaces": [
+    {
+      "name": "service-queues-service-form",
+      "title": "addNewQueueService",
+      "component": "addNewQueueServiceWorkspace",
+      "type": "service-queues",
+      "privileges": "app:service-queues"
+    },
+    {
+      "name": "service-queues-room-workspace",
+      "title": "addNewQueueServiceRoom",
+      "component": "addNewQueueServiceRoomWorkspace",
+      "type": "service-queues",
+      "privileges": "app:service-queues"
+    },
+    {
+      "name": "service-queues-linelist-filter",
+      "title": "filter",
+      "component": "queueLinelistFilterWorkspace",
+      "type": "service-queues",
+      "privileges": "app:service-queues"
+    },
+    {
+      "name": "create-queue-entry-workspace",
+      "title": "addPatientToQueue",
+      "component": "createQueueEntryWorkspace",
+      "type": "service-queues",
+      "privileges": "app:service-queues",
+      "width": "wider"
+    }
+  ],
+  "workspaces2": [
+    {
+      "name": "service-queues-patient-vitals-workspace",
+      "component": "@sihsalus/esm-patient-vitals-app#vitalsBiometricsFormWorkspace",
+      "window": "service-queues-patient-vitals",
+      "privileges": "app:service-queues"
+    },
+    {
+      "name": "service-queues-visit-notes-workspace",
+      "component": "@sihsalus/esm-patient-notes-app#visitNotesFormWorkspace",
+      "window": "service-queues-visit-note",
+      "privileges": "app:service-queues"
+    }
+  ],
+  "workspaceWindows2": [
+    {
+      "name": "service-queues-patient-vitals",
+      "group": "service-queues"
+    },
+    {
+      "name": "service-queues-visit-note",
+      "group": "service-queues"
+    }
+  ]
+}

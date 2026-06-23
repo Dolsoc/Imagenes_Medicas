@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "webservices.rest": ">=2.2.0"
+  },
+  "pages": [
+    {
+      "component": "root",
+      "route": "odontologia",
+      "privileges": "app:clinical.chart.dentistry"
+    }
+  ],
+  "extensions": [
+    {
+      "name": "odontologia-dashboard-link",
+      "component": "odontologiaDashboardLink",
+      "privileges": "app:clinical.chart.dentistry",
+      "slot": "patient-chart-dashboard-slot",
+      "order": 12,
+      "meta": {
+        "slot": "patient-chart-odontologia-slot",
+        "columns": 1,
+        "title": "Atención odontológica",
+        "path": "atencion-odontologica",
+        "icon": "omrs-icon-generic-order-type",
+        "layoutMode": "anchored"
+      }
+    },
+    {
+      "name": "odontologia-dashboard",
+      "component": "odontologiaDashboard",
+      "privileges": "app:clinical.chart.dentistry",
+      "slot": "patient-chart-odontologia-slot",
+      "order": 0,
+      "online": true,
+      "offline": false
+    }
+  ],
+  "workspaces": [
+    {
+      "name": "odontologia-odontogram-form-workspace",
+      "component": "odontologiaOdontogramWorkspace",
+      "privileges": "app:clinical.chart.dentistry.edit",
+      "type": "clinical-form",
+      "title": "odontogramWorkspaceTitle",
+      "width": "extra-wide",
+      "canMaximize": true,
+      "canHide": true,
+      "preferredWindowSize": "maximized"
+    }
+  ]
+}

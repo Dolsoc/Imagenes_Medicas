@@ -1,0 +1,117 @@
+@use "@carbon/layout";
+@use "@carbon/type";
+@use "@openmrs/esm-styleguide/src/vars" as *;
+
+.label01 {
+  @include type.type-style("label-01");
+}
+
+.bodyShort01 {
+  @include type.type-style("body-compact-01");
+}
+
+.bodyLong01 {
+  @include type.type-style("body-01");
+}
+
+.growthChartContainer {
+  display: flex;
+  margin: 0 layout.$spacing-05;
+  flex-direction: row;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.growthArea {
+  flex-grow: 1;
+  margin: layout.$spacing-03 0;
+  min-width: 0;
+  padding-right: layout.$spacing-05;
+
+  // This is a hack to override the max-width of the overflow menu button
+  :global(
+    .cds--chart-holder
+      .cds--cc--toolbar
+      .cds--overflow-menu-options
+      .cds--overflow-menu-options__option
+      .cds--overflow-menu-options__btn
+  ) {
+    max-width: none !important;
+  }
+
+  :global(.cds--chart-holder),
+  :global(.cds--cc--chart-wrapper) {
+    min-width: 0;
+  }
+}
+
+.growthLabel {
+  @extend .label01;
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: layout.$spacing-03;
+  margin-bottom: layout.$spacing-03;
+}
+
+.chartSummary {
+  border: 1px solid $ui-03;
+  border-radius: layout.$spacing-02;
+  margin-bottom: layout.$spacing-05;
+  padding: layout.$spacing-04;
+}
+
+.summaryText {
+  @extend .bodyShort01;
+  color: $text-02;
+  display: flex;
+  flex-wrap: wrap;
+  gap: layout.$spacing-05;
+}
+
+.emptyMeasurementNotice {
+  margin-bottom: layout.$spacing-05;
+}
+
+.tab {
+  outline: 0;
+  outline-offset: 0;
+  min-height: layout.$spacing-07 !important;
+  block-size: layout.$spacing-05 !important;
+
+  &:active,
+  &:focus {
+    outline: layout.$spacing-01 solid var(--brand-03) !important;
+  }
+
+  &[aria-selected="true"] {
+    box-shadow: inset 4px 0 0 0 var(--brand-03) !important;
+    border-bottom: none;
+    font-weight: 600;
+    margin-left: 0 !important;
+  }
+
+  &[aria-selected="false"] {
+    border-bottom: none;
+    border-left: layout.$spacing-01 solid $ui-03;
+    margin-left: 0 !important;
+  }
+}
+
+@media (max-width: 42rem) {
+  .growthChartContainer {
+    margin: 0 layout.$spacing-03;
+  }
+
+  .growthArea {
+    padding-right: 0;
+  }
+
+  .chartSummary {
+    margin-bottom: layout.$spacing-04;
+  }
+
+  .summaryText {
+    gap: layout.$spacing-03;
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "@openmrs/esm-patient-common-lib",
+  "version": "12.1.0",
+  "license": "MPL-2.0",
+  "description": "Library for common patient chart components",
+  "main": "src/index.ts",
+  "source": true,
+  "scripts": {
+    "lint": "node ../../tooling/scripts/run-biome.js lint src",
+    "test": "vitest run --passWithNoTests",
+    "typescript": "tsc"
+  },
+  "browserslist": [
+    "extends browserslist-config-openmrs"
+  ],
+  "keywords": [
+    "openmrs"
+  ],
+  "homepage": "https://github.com/openmrs/openmrs-esm-patient-chart#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openmrs/openmrs-esm-patient-chart.git"
+  },
+  "bugs": {
+    "url": "https://github.com/openmrs/openmrs-esm-patient-chart/issues"
+  },
+  "dependencies": {
+    "@carbon/react": "^1.83.0",
+    "jsep": "^1.4.0",
+    "lodash-es": "^4.17.23",
+    "uuid": "^14.0.0"
+  },
+  "peerDependencies": {
+    "@openmrs/esm-extensions": "*",
+    "@openmrs/esm-framework": "*",
+    "@openmrs/esm-styleguide": "*",
+    "@sihsalus/esm-form-engine-lib": "*",
+    "react": "18.x",
+    "single-spa": "6.x"
+  },
+  "devDependencies": {
+    "@openmrs/esm-extensions": "workspace:*",
+    "@openmrs/esm-styleguide": "workspace:*",
+    "@sihsalus/esm-form-engine-lib": "workspace:*",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.7"
+  }
+}

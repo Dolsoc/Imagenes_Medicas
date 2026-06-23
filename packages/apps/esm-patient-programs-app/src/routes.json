@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "webservices.rest": ">=2.2.0"
+  },
+  "extensions": [
+    {
+      "name": "programs-overview-widget",
+      "component": "programsOverview",
+      "privileges": "app:clinical.chart.programs",
+      "meta": {
+        "fullWidth": false
+      },
+      "order": 6
+    },
+    {
+      "name": "programs-details-widget",
+      "slot": "patient-chart-programs-dashboard-slot",
+      "component": "programsDetailedSummary",
+      "privileges": "app:clinical.chart.programs",
+      "order": 6
+    },
+    {
+      "name": "programs-summary-dashboard",
+      "slot": "patient-chart-dashboard-slot",
+      "component": "programsDashboardLink",
+      "privileges": "app:clinical.chart.programs",
+      "meta": {
+        "slot": "patient-chart-programs-dashboard-slot",
+        "path": "Programs"
+      },
+      "order": 20
+    }
+  ],
+  "pages": [],
+  "workspaces2": [
+    {
+      "name": "programs-form-workspace",
+      "component": "programsFormWorkspace",
+      "window": "programs-form-window",
+      "privileges": "app:clinical.chart.programs.edit"
+    }
+  ],
+  "workspaceWindows2": [
+    {
+      "name": "programs-form-window",
+      "group": "patient-chart"
+    }
+  ],
+  "modals": [
+    {
+      "name": "program-delete-confirmation-modal",
+      "component": "deleteProgramConfirmationModal",
+      "privileges": "app:clinical.chart.programs.edit"
+    }
+  ]
+}

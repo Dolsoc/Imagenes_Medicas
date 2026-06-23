@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "fhir2": ">=1.2",
+    "webservices.rest": ">=2.24.0",
+    "o3forms": "*"
+  },
+  "extensions": [
+    {
+      "name": "form-widget",
+      "component": "formWidget",
+      "slot": "form-widget-slot",
+      "online": true,
+      "offline": true
+    }
+  ],
+  "pages": []
+}

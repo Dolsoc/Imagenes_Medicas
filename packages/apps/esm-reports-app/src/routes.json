@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "fhir2": ">=1.2",
+    "webservices.rest": ">=2.2.0",
+    "reportingrest": ">=1.15.0",
+    "reporting": ">=1.27.0"
+  },
+  "extensions": [
+    {
+      "name": "reports-app-menu-item",
+      "slot": "app-menu-item-slot",
+      "component": "reportsAppMenuItem",
+      "order": 50
+    },
+    {
+      "name": "run-report",
+      "component": "runReport"
+    }
+  ],
+  "pages": [
+    {
+      "component": "root",
+      "route": "reports"
+    },
+    {
+      "component": "overview",
+      "route": "overview"
+    },
+    {
+      "component": "scheduled-overview",
+      "route": "scheduled-overview"
+    },
+    {
+      "component": "reports-data-overview",
+      "route": "reports-data-overview"
+    }
+  ],
+  "modals": [
+    {
+      "name": "cancel-report-modal",
+      "component": "cancelReportModal"
+    }
+  ]
+}

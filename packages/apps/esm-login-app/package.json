@@ -1,0 +1,70 @@
+{
+  "name": "@sihsalus/esm-login-app",
+  "version": "1.0.0-alpha",
+  "license": "MPL-2.0",
+  "description": "The login microfrontend for the Sihsalus SPA",
+  "browser": "dist/openmrs-esm-login-app.js",
+  "main": "src/index.ts",
+  "source": true,
+  "scripts": {
+    "start": "openmrs develop",
+    "serve": "rspack serve --mode=development",
+    "debug": "yarn serve",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest watch",
+    "coverage": "vitest run --coverage --passWithNoTests",
+    "build": "rspack --mode=production",
+    "build:development": "rspack --mode=development",
+    "analyze": "rspack --mode=production --env analyze=true",
+    "typescript": "tsc",
+    "lint": "node ../../tooling/scripts/run-biome.js lint .",
+    "extract-translations": "i18next 'src/**/*.{ts,tsx}' '!src/**/*.test.{ts,tsx}' '!src/**/*.spec.{ts,tsx}' --config ../../tooling/scripts/i18next-parser.config.js"
+  },
+  "keywords": [
+    "openmrs",
+    "microfrontends"
+  ],
+  "browserslist": [
+    "extends browserslist-config-openmrs"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openmrs/openmrs-esm-core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/openmrs/openmrs-esm-core/issues"
+  },
+  "homepage": "https://github.com/openmrs/openmrs-esm-core#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@carbon/react": "^1.92.1",
+    "@hookform/resolvers": "^3.6.0",
+    "@sihsalus/esm-rbac": "workspace:*",
+    "lodash-es": "^4.17.21",
+    "react-hook-form": "^7.52.2",
+    "zod": "^3.23.8"
+  },
+  "peerDependencies": {
+    "@carbon/react": "1.x",
+    "@openmrs/esm-framework": "*",
+    "react": "18.x",
+    "react-dom": "18.x",
+    "react-i18next": "16.x",
+    "react-router-dom": "6.x",
+    "rxjs": "6.x",
+    "swr": "2.x"
+  },
+  "devDependencies": {
+    "openmrs": "*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^16.0.0",
+    "react-router-dom": "^6.3.0",
+    "rxjs": "^6.5.3",
+    "swr": "2.2.5",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.7"
+  }
+}

@@ -1,0 +1,313 @@
+@use "@carbon/colors";
+@use "@carbon/layout";
+@use "@carbon/type";
+@use "@openmrs/esm-styleguide/src/vars" as *;
+
+.productiveHeading02 {
+  @include type.type-style("heading-compact-02");
+  margin-bottom: layout.$spacing-05;
+}
+
+.productiveHeading02Light {
+  @include type.type-style("heading-compact-02");
+  margin-bottom: layout.$spacing-05;
+  color: colors.$gray-70;
+}
+
+.label01 {
+  @include type.type-style("label-01");
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: layout.$spacing-05;
+}
+
+.basicInfoNameLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(12rem, 14rem);
+  column-gap: layout.$spacing-07;
+  align-items: start;
+}
+
+.nameInputsPanel {
+  min-width: 0;
+}
+
+.nameKnownToggle {
+  margin-bottom: layout.$spacing-05;
+}
+
+.nameFieldsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(14rem, 1fr));
+  column-gap: layout.$spacing-05;
+}
+
+.requiredHeading::after {
+  content: " *";
+  color: colors.$red-60;
+}
+
+:global(.cds--form-item:has(input[required]) .cds--label::after),
+:global(.cds--form-item:has(select[required]) .cds--label::after),
+:global(.cds--form-item:has(textarea[required]) .cds--label::after),
+:global(.cds--form-item:has(input[aria-required="true"]) .cds--label::after) {
+  content: " *";
+  color: colors.$red-60;
+}
+
+.addressFieldGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  column-gap: layout.$spacing-05;
+  row-gap: layout.$spacing-03;
+  padding-bottom: layout.$spacing-05;
+  align-items: start;
+}
+
+.halfWidthInDesktopView {
+  width: 100%;
+  min-width: 0;
+}
+
+.fullWidthInDesktopView {
+  width: 100%;
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.patientPhoto {
+  display: flex;
+  justify-content: center;
+}
+
+.nameField {
+  grid-row: 1;
+  grid-column: 1;
+}
+
+.nameField > :global(.cds--content-switcher) {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: max-content;
+  justify-content: flex-start;
+}
+
+.contentSwitcher {
+  margin-bottom: layout.$spacing-05;
+}
+
+.dobField > :global(.cds--content-switcher) {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: max-content;
+  justify-content: flex-start;
+}
+
+.photoExtension {
+  margin-bottom: layout.$spacing-05;
+  justify-self: start;
+  width: 100%;
+  max-width: 14rem;
+  // Reserve the space the photo capture widget occupies so the column does not
+  // collapse (and the surrounding layout does not jump) while the widget mounts.
+  min-height: 13.75rem;
+}
+
+.sexField,
+.dobField,
+.dodField {
+  margin-bottom: layout.$spacing-05;
+
+  span {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: start;
+  }
+}
+
+.nonCodedCauseOfDeath {
+  margin-top: layout.$spacing-04;
+}
+
+.timeOfDeathContainer {
+  display: flex;
+  align-items: center;
+}
+
+.timeOfDeathField {
+  flex: none;
+  margin-left: layout.$spacing-02;
+}
+
+.dobContentSwitcherLabel {
+  margin-bottom: layout.$spacing-03;
+}
+
+.identifierLabelText {
+  display: flex;
+  align-items: center;
+}
+
+.arrowRightIcon {
+  fill: currentColor !important;
+}
+
+.configureIdentifiersButton {
+  display: flex;
+  align-items: center;
+  margin: 0 0 layout.$spacing-05 layout.$spacing-05;
+
+  svg {
+    margin-left: layout.$spacing-03;
+  }
+
+  .customField {
+    margin-bottom: layout.$spacing-05;
+  }
+}
+
+.externalLookup {
+  display: grid;
+  align-content: start;
+  row-gap: layout.$spacing-04;
+  height: 100%;
+  min-height: 8rem;
+  background-color: colors.$gray-10;
+  padding: layout.$spacing-05;
+  border-left: 0.25rem solid colors.$green-60;
+}
+
+.externalLookupHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: layout.$spacing-03 layout.$spacing-05;
+
+  .productiveHeading02Light {
+    margin-bottom: 0;
+  }
+}
+
+.externalLookupDocument {
+  @include type.type-style("label-01");
+  color: colors.$gray-70;
+}
+
+.externalLookupAction {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: layout.$spacing-04;
+}
+
+.externalLookupNotification {
+  margin: 0;
+  max-width: 32rem;
+}
+
+.identifierFieldRow {
+  display: flex;
+  align-items: center;
+  justify-content: initial;
+}
+
+.identifierFieldsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: layout.$spacing-05;
+  row-gap: layout.$spacing-03;
+}
+
+.identifierFieldRow + .identifierFieldRow {
+  margin-top: 0;
+}
+
+.attributeField {
+  margin-bottom: layout.$spacing-05;
+}
+
+.searchableCodedField {
+  :global(.cds--list-box__wrapper),
+  :global(.cds--combo-box) {
+    margin-block-start: 0;
+  }
+
+  :global(.cds--label) {
+    margin-block-end: layout.$spacing-03;
+  }
+}
+
+.locationAttributeFieldContainer {
+  position: relative;
+
+  .loadingContainer {
+    background-color: colors.$white;
+    position: absolute;
+    right: layout.$spacing-07;
+    bottom: layout.$spacing-02;
+  }
+}
+
+:global(.omrs-breakpoint-lt-desktop) {
+  .grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .basicInfoNameLayout {
+    grid-template-columns: 1fr;
+    row-gap: layout.$spacing-05;
+  }
+
+  .nameFieldsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .nameField {
+    grid-row: 2;
+    grid-column: 1;
+  }
+
+  .photoExtension {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+  }
+
+  .radioButton label {
+    height: layout.$spacing-09 !important;
+  }
+
+  .halfWidthInDesktopView {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .fullWidthInDesktopView {
+    width: 100%;
+  }
+
+  .identifierFieldRow {
+    width: 100%;
+  }
+
+  .identifierFieldsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.radioFieldError {
+  color: colors.$red-60;
+  display: block;
+  font-weight: 400;
+  max-height: 12.5rem;
+  overflow: visible;
+  font-size: layout.$spacing-04;
+  letter-spacing: 0.32px;
+  line-height: 1.34;
+  margin: layout.$spacing-02 0 0;
+}

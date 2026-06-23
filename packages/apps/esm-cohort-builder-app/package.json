@@ -1,0 +1,82 @@
+{
+  "name": "@sihsalus/esm-cohort-builder-app",
+  "version": "1.0.0-alpha",
+  "license": "MPL-2.0",
+  "description": "O3 frontend module for managing cohorts",
+  "browser": "dist/openmrs-esm-cohort-builder-app.js",
+  "main": "src/index.ts",
+  "source": true,
+  "scripts": {
+    "start": "openmrs develop",
+    "serve": "rspack serve --mode=development",
+    "build": "rspack --mode=production",
+    "analyze": "rspack --mode=production --env analyze=true",
+    "lint": "node ../../tooling/scripts/run-biome.js lint .",
+    "prettier": "node ../../tooling/scripts/run-biome.js format --write src",
+    "typescript": "tsc",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest watch",
+    "test-e2e": "yarn --cwd ../../.. playwright test --config e2e/cohort-builder/playwright.config.ts",
+    "verify": "turbo run lint test typescript",
+    "coverage": "vitest run --coverage --passWithNoTests",
+    "extract-translations": "i18next 'src/**/*.{ts,tsx}' '!src/**/*.test.{ts,tsx}' '!src/**/*.spec.{ts,tsx}' --config ../../tooling/scripts/i18next-parser.config.js"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "browserslist": [
+    "extends browserslist-config-openmrs"
+  ],
+  "keywords": [
+    "openmrs",
+    "microfrontends"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openmrs/openmrs-esm-cohortbuilder-app.git"
+  },
+  "homepage": "https://github.com/openmrs/openmrs-esm-cohortbuilder-app#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/openmrs/openmrs-esm-cohortbuilder-app/issues"
+  },
+  "peerDependencies": {
+    "@openmrs/esm-framework": "*",
+    "react": "18.x",
+    "react-dom": "18.x",
+    "react-i18next": "^16.0.0"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
+    "classnames": "^2.3.2",
+    "dotenv": "^16.3.1",
+    "lodash-es": "^4.17.21",
+    "react-hook-form": "^7.56.1",
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "@carbon/react": "^1.83.0",
+    "@openmrs/esm-framework": "workspace:*",
+    "@openmrs/esm-styleguide": "workspace:*",
+    "@playwright/test": "^1.52.0",
+    "@swc/cli": "0.8.1",
+    "@swc/core": "1.15.21",
+    "@types/react": "^18.3.21",
+    "@types/react-dom": "^18.3.0",
+    "dayjs": "^1.11.7",
+    "i18next": "^25.0.0",
+    "i18next-parser": "^9.0.2",
+    "lodash": "^4.18.1",
+    "openmrs": "*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^16.0.0",
+    "turbo": "^2.9.14",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.7"
+  },
+  "packageManager": "yarn@4.10.3"
+}

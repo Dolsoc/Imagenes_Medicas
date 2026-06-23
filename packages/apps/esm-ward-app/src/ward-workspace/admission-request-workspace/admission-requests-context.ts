@@ -1,0 +1,22 @@
+import { type DefaultWorkspaceProps } from '@openmrs/esm-framework';
+import { createContext, type ReactNode, useContext } from 'react';
+
+export interface AdmissionRequestsWorkspaceContextProps extends DefaultWorkspaceProps {
+  wardPendingPatients: ReactNode;
+}
+
+export const AdmissionRequestsWorkspaceContext = createContext<AdmissionRequestsWorkspaceContextProps>(null);
+
+export const AdmissionRequestsWorkspaceContextProvider = AdmissionRequestsWorkspaceContext.Provider;
+
+export const useAdmissionRequestsWorkspaceContext = () => {
+  const context = useContext(AdmissionRequestsWorkspaceContext);
+
+  if (!context) {
+    throw new Error(
+      'useAdmissionRequestsWorkspaceContext must be used within a AdmissionRequestsWorkspaceContextProvider',
+    );
+  }
+
+  return context;
+};

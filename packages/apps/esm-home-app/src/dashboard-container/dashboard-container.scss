@@ -1,0 +1,108 @@
+@use "@carbon/colors";
+
+.homePageWrapper {
+  --sihsalus-home-dashboard-min-height: calc(100vh - 3rem);
+
+  display: flex;
+  min-height: var(--sihsalus-home-dashboard-min-height);
+  background-color: colors.$white-0;
+}
+
+.dashboardContainer {
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  margin: 0;
+  // Full vertical height minus the primary navigation menu height.
+  // Use min-height so long dashboards keep the home surface instead of exposing the app shell background.
+  min-height: var(--sihsalus-home-dashboard-min-height);
+
+  // Ensure the width of the home page dashboard is fixed
+  // and does not expand based on the width of its children
+  width: calc(100% - var(--sihsalus-left-nav-width, 16rem));
+  background-color: colors.$white-0;
+  transition:
+    margin-inline-start 300ms ease,
+    width 300ms ease;
+
+  & a {
+    width: 100%;
+  }
+
+  &.hasLeftNav {
+    // Make space for the left nav menu
+    margin-inline-start: var(--sihsalus-left-nav-width, 16rem);
+  }
+}
+
+.dashboardContainerTablet {
+  flex-grow: 1;
+  min-height: var(--sihsalus-home-dashboard-min-height);
+  background-color: colors.$white-0;
+}
+
+.logoSection {
+  display: flex;
+  justify-content: center;
+}
+
+.dashboardView {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: var(--sihsalus-home-dashboard-min-height);
+  background-color: colors.$white-0;
+}
+
+.applicationDashboardExtension {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: var(--sihsalus-home-dashboard-min-height);
+  background-color: colors.$white-0;
+}
+
+.applicationDashboardExtension > :global(div:only-child),
+.applicationDashboardExtension > :global(main:only-child),
+.applicationDashboardExtension > :global(section:only-child) {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--sihsalus-home-dashboard-min-height);
+  background-color: colors.$white-0;
+}
+
+:global(.sihsalus-side-nav__item) {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+}
+
+:global(.sihsalus-side-nav__icon) {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  flex: 0 0 1.25rem;
+  color: colors.$gray-70;
+  display: block;
+}
+
+:global(.sihsalus-side-nav__text) {
+  display: block;
+  min-width: 0;
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition:
+    opacity 300ms ease,
+    max-width 300ms ease;
+}
+
+:global(.active-left-nav-link .sihsalus-side-nav__icon),
+:global(.cds--side-nav__link:hover .sihsalus-side-nav__icon),
+:global(.cds--side-nav__link:focus .sihsalus-side-nav__icon) {
+  color: var(--brand-01);
+}

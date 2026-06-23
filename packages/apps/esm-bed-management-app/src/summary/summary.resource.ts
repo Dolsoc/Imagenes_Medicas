@@ -1,0 +1,293 @@
+import { type FetchResponse, openmrsFetch, restBaseUrl, useConfig } from '@openmrs/esm-framework';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import useSWR from 'swr';
+
+import { type BedManagementConfig } from '../config-schema';
+import type {
+  AdmissionLocation,
+  Bed,
+  BedFetchResponse,
+  BedTagData,
+  BedTagPayload,
+  BedType,
+  BedTypePayload,
+  BedWithLocation,
+  LocationFetchResponse,
+  MappedBedData,
+} from '../types';
+
+export const useLocationsWithAdmissionTag = () => {
+  const { admissionLocationTagName } = useConfig<BedManagementConfig>();
+  const locationsUrl = `${restBaseUrl}/location?tag=${admissionLocationTagName}&v=full`;
+
+  const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<LocationFetchResponse>, Error>(
+    admissionLocationTagName ? locationsUrl : null,
+    openmrsFetch,
+  );
+
+  const results = useMemo(
+    () => ({
+      admissionLocations: data?.data?.results ?? [],
+      errorLoadingAdmissionLocations: error,
+      isLoadingAdmissionLocations: isLoading,
+      isValidatingAdmissionLocations: isValidating,
+      mutateAdmissionLocations: mutate,
+    }),
+    [data, error, isLoading, isValidating, mutate],
+  );
+
+  return results;
+};
+
+export const useBedsForLocation = (locationUuid: string) => {
+  const apiUrl = `${restBaseUrl}/bed?locationUuid=${locationUuid}&v=full`;
+
+  const { data, isLoading, error, mutate, isValidating } = useSWR<{ data: { results: Array<Bed> } }, Error>(
+    locationUuid ? apiUrl : null,
+    openmrsFetch,
+  );
+
+  const mappedBedData: MappedBedData = (data?.data?.results ?? []).map((bed) => ({
+    id: bed.id,
+    type: bed.bedType?.displayName,
+    number: bed.bedNumber,
+    status: bed.status,
+    uuid: bed.uuid,
+  }));
+
+  const results = useMemo(
+    () => ({
+      bedsData: mappedBedData,
+      errorLoadingBeds: error,
+      isLoadingBeds: isLoading,
+      mutate,
+      isValidating,
+    }),
+    [mappedBedData, isLoading, error, mutate, isValidating],
+  );
+
+  return results;
+};
+
+export const useLocationName = (locationUuid: string) => {
+  const { admissionLocations, isLoadingAdmissionLocations } = useLocationsWithAdmissionTag();
+  const matchingLocation = admissionLocations.find((location) => location.uuid === locationUuid);
+
+  const results = useMemo(
+    () => ({
+      name: matchingLocation?.display ?? null,
+      isLoadingLocationData: isLoadingAdmissionLocations,
+    }),
+    [matchingLocation, isLoadingAdmissionLocations],
+  );
+
+  return results;
+};
+
+function mapBedWithLocation(bed: Bed, location: { display: string; uuid: string }): BedWithLocation {
+  return { ...bed, location };
+}
+
+export function useBedsGroupedByLocation() {
+  const { admissionLocations, isLoadingAdmissionLocations } = useLocationsWithAdmissionTag();
+
+  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isValidating, setIsValidating] = useState(true);
+  const [result, setResult] = useState<Array<Array<BedWithLocation>>>([]);
+
+  useEffect(() => {
+    let isSubscribed = true;
+    if (!isLoadingAdmissionLocations && admissionLocations && isValidating) {
+      const fetchData = async () => {
+        const promises = admissionLocations.map(async (location): Promise<Array<BedWithLocation> | null> => {
+          const bedsUrl = `${restBaseUrl}/bed?locationUuid=${location.uuid}`;
+          const bedsFetchResult = await openmrsFetch<BedFetchResponse>(bedsUrl, {
+            method: 'GET',
+          });
+          const beds = bedsFetchResult.data.results;
+          if (beds.length) {
+            return beds.map((bed) => mapBedWithLocation(bed, { display: location.display, uuid: location.uuid }));
+          }
+          return null;
+        });
+
+        const updatedWards = (await Promise.all(promises)).filter(
+          (value): value is Array<BedWithLocation> => value !== null,
+        );
+        if (isSubscribed) {
+          setResult(updatedWards);
+        }
+      };
+      void fetchData()
+        .catch((error: unknown) => {
+          if (isSubscribed) {
+            setError(error instanceof Error ? error : new Error('Unknown error loading grouped beds'));
+          }
+        })
+        .finally(() => {
+          if (isSubscribed) {
+            setIsLoading(false);
+            setIsValidating(false);
+          }
+        });
+    }
+    return () => {
+      isSubscribed = false;
+    };
+  }, [admissionLocations, isLoadingAdmissionLocations, isValidating]);
+
+  const mutate = useCallback(() => {
+    setIsValidating(true);
+  }, []);
+
+  const results = useMemo(
+    () => ({
+      bedsGroupedByLocation: result,
+      errorFetchingBedsGroupedByLocation: error,
+      isLoadingBedsGroupedByLocation: isLoading || isLoadingAdmissionLocations,
+      isValidatingBedsGroupedByLocation: isValidating,
+      mutateBedsGroupedByLocation: mutate,
+    }),
+    [error, isLoading, isLoadingAdmissionLocations, isValidating, mutate, result],
+  );
+
+  return results;
+}
+
+export const useAdmissionLocations = () => {
+  const locationsUrl = `${restBaseUrl}/admissionLocation?v=full`;
+  const { data, error, isLoading, isValidating, mutate } = useSWR<
+    FetchResponse<{ results: Array<AdmissionLocation> }>,
+    Error
+  >(locationsUrl, openmrsFetch);
+
+  const results = useMemo(
+    () => ({
+      data: data?.data?.results ?? [],
+      error,
+      isLoading,
+      isValidating,
+      mutate,
+    }),
+    [data, error, isLoading, isValidating, mutate],
+  );
+
+  return results;
+};
+
+export const useAdmissionLocationBedLayout = (locationUuid: string) => {
+  const locationsUrl = `${restBaseUrl}/admissionLocation/${locationUuid}?v=full`;
+  const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<AdmissionLocation>, Error>(
+    locationsUrl,
+    openmrsFetch,
+  );
+
+  const results = useMemo(
+    () => ({
+      data: data?.data?.bedLayouts ?? [],
+      error,
+      isLoading,
+      isValidating,
+      mutate,
+    }),
+    [data, error, isLoading, isValidating, mutate],
+  );
+
+  return results;
+};
+
+export const useBedTypes = () => {
+  const url = `${restBaseUrl}/bedtype/`;
+  const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<{ results: Array<BedType> }>, Error>(
+    url,
+    openmrsFetch,
+  );
+
+  const results = useMemo(
+    () => ({
+      bedTypes: data?.data?.results ?? [],
+      errorLoadingBedTypes: error,
+      isLoadingBedTypes: isLoading,
+      isValidatingBedTypes: isValidating,
+      mutateBedTypes: mutate,
+    }),
+    [data, error, isLoading, isValidating, mutate],
+  );
+
+  return results;
+};
+
+export const useBedTags = () => {
+  const url = `${restBaseUrl}/bedTag/`;
+  const { data, error, isLoading, isValidating, mutate } = useSWR<FetchResponse<{ results: Array<BedTagData> }>, Error>(
+    url,
+    openmrsFetch,
+  );
+
+  const results = useMemo(
+    () => ({
+      bedTags: data?.data?.results ?? [],
+      errorLoadingBedTags: error,
+      isLoadingBedTags: isLoading,
+      isValidatingBedTags: isValidating,
+      mutateBedTags: mutate,
+    }),
+    [data, error, isLoading, isValidating, mutate],
+  );
+
+  return results;
+};
+
+export async function saveBedType({
+  bedTypePayload,
+}: {
+  bedTypePayload: BedTypePayload;
+}): Promise<FetchResponse<BedType>> {
+  const response = await openmrsFetch<BedType>(`${restBaseUrl}/bedtype`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: bedTypePayload,
+  });
+  return response;
+}
+
+export async function saveBedTag({
+  bedTagPayload,
+}: {
+  bedTagPayload: BedTagPayload;
+}): Promise<FetchResponse<BedTagData>> {
+  return await openmrsFetch<BedTagData>(`${restBaseUrl}/bedTag/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: bedTagPayload,
+  });
+}
+
+export async function editBedType({
+  bedTypePayload,
+  bedTypeId,
+}: {
+  bedTypeId: string;
+  bedTypePayload: BedTypePayload;
+}): Promise<FetchResponse<BedType>> {
+  return await openmrsFetch<BedType>(`${restBaseUrl}/bedtype/${bedTypeId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: bedTypePayload,
+  });
+}
+
+export async function editBedTag({
+  bedTagPayload,
+  bedTagId,
+}: {
+  bedTagId: string;
+  bedTagPayload: BedTagPayload;
+}): Promise<FetchResponse<BedTagData>> {
+  return await openmrsFetch<BedTagData>(`${restBaseUrl}/bedTag/${bedTagId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: bedTagPayload,
+  });
+}

@@ -1,0 +1,33 @@
+@use "@carbon/layout";
+
+.changeLocationButton {
+  width: fit-content;
+  max-width: 22rem;
+  background-color: transparent;
+  color: white;
+  font-size: 14px;
+  padding: layout.$spacing-04 !important; // this gets unset in rtl language without !important
+
+  &:hover {
+    color: white;
+  }
+}
+
+.currentLocationText {
+  overflow: hidden;
+  padding-inline: layout.$spacing-04;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 48rem) {
+  .changeLocationButton {
+    width: layout.$spacing-09;
+    min-width: layout.$spacing-09;
+    padding-inline: layout.$spacing-04 !important;
+  }
+
+  .currentLocationText {
+    display: none;
+  }
+}

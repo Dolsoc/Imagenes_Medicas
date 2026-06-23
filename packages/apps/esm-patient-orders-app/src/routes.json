@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "fhir2": ">=1.2",
+    "webservices.rest": ">=2.2.0"
+  },
+  "optionalBackendDependencies": {
+    "fhirproxy": ">=1.0.0",
+    "stockmanagement": ">=2.0.2",
+    "billing": ">=1.2.0"
+  },
+  "extensions": [
+    {
+      "name": "order-price-details",
+      "component": "orderPriceDetailsExtension",
+      "slot": "order-item-additional-info-slot",
+      "order": 0
+    },
+    {
+      "name": "order-stock-details",
+      "component": "orderStockDetailsExtension",
+      "slot": "order-item-additional-info-slot",
+      "order": 1
+    },
+    {
+      "name": "order-basket-action-menu",
+      "component": "orderBasketActionMenu",
+      "slot": "action-menu-ward-patient-items-slot"
+    },
+    {
+      "name": "lab-result",
+      "component": "labResult",
+      "slot": "completed-lab-order-results-slot",
+      "meta": {
+        "fullWidth": false
+      }
+    },
+    {
+      "name": "patient-orders-summary-dashboard",
+      "component": "ordersDashboardLink",
+      "slot": "patient-chart-dashboard-slot",
+      "privileges": "app:clinical.chart.orders",
+      "meta": {
+        "slot": "patient-chart-orders-dashboard-slot",
+        "path": "Orders",
+        "hideDashboardTitle": true
+      },
+      "order": 4
+    },
+    {
+      "name": "patient-orders-dashboard",
+      "component": "ordersDashboard",
+      "slot": "patient-chart-orders-dashboard-slot",
+      "privileges": "app:clinical.chart.orders",
+      "meta": {
+        "fullWidth": false
+      }
+    }
+  ],
+  "workspaces2": [
+    {
+      "name": "order-basket",
+      "component": "orderBasketWorkspace",
+      "window": "patient-chart-orders",
+      "privileges": "app:clinical.chart.orders.edit"
+    },
+    {
+      "name": "orderable-concept-workspace",
+      "component": "orderableConceptSearch",
+      "window": "patient-chart-orders",
+      "privileges": "app:clinical.chart.orders.edit"
+    },
+    {
+      "name": "patient-orders-form-workspace",
+      "component": "patientOrdersFormWorkspace",
+      "window": "patient-chart-orders",
+      "privileges": "app:clinical.chart.orders.edit"
+    },
+    {
+      "name": "test-results-form-workspace",
+      "component": "testResultsFormWorkspace",
+      "window": "patient-chart-orders",
+      "privileges": "app:clinical.chart.results.edit"
+    },
+    {
+      "name": "add-radiology-order",
+      "component": "orderableConceptSearch",
+      "window": "patient-chart-orders",
+      "privileges": "app:clinical.chart.orders.edit"
+    },
+    {
+      "name": "add-immunization-order",
+      "component": "orderableConceptSearch",
+      "window": "patient-chart-orders",
+      "privileges": "app:clinical.chart.orders.edit"
+    },
+    {
+      "name": "add-referral-order",
+      "component": "orderableConceptSearch",
+      "window": "patient-chart-orders",
+      "privileges": "app:clinical.chart.orders.edit"
+    }
+  ],
+  "workspaceWindows2": [
+    {
+      "name": "patient-chart-orders",
+      "group": "patient-chart",
+      "icon": "orderBasketActionButton",
+      "order": 3
+    }
+  ]
+}

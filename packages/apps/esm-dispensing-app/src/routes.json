@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "fhir2": ">=1.2",
+    "webservices.rest": ">=2.2.0"
+  },
+  "pages": [
+    {
+      "component": "dispensing",
+      "route": "dispensing",
+      "online": true,
+      "offline": true
+    }
+  ],
+  "extensions": [
+    {
+      "name": "dispensing-link",
+      "slot": "app-menu-slot",
+      "component": "dispensingLink",
+      "privileges": "app:dispensing",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "patient-diagnoses",
+      "component": "patientDiagnoses",
+      "slot": "dispensing-condition-and-diagnoses",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "patient-conditions",
+      "component": "patientConditions",
+      "slot": "dispensing-condition-and-diagnoses",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "dispensing-dashboard",
+      "slot": "dispensing-dashboard-slot",
+      "component": "dispensingDashboard",
+      "privileges": "app:dispensing",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "dispensing-dashboard-link",
+      "slot": "homepage-dashboard-slot",
+      "component": "dispensingDashboardLink",
+      "meta": {
+        "name": "dispensing",
+        "slot": "dispensing-dashboard-slot",
+        "title": "dispensing"
+      },
+      "privileges": "app:dispensing",
+      "order": 40
+    },
+    {
+      "name": "dispense-action-button",
+      "slot": "prescription-action-button-slot",
+      "component": "dispenseActionButton"
+    },
+    {
+      "name": "pause-action-button",
+      "slot": "prescription-action-button-slot",
+      "component": "pauseActionButton"
+    },
+    {
+      "name": "close-action-button",
+      "slot": "prescription-action-button-slot",
+      "component": "closeActionButton"
+    }
+  ],
+  "workspaces2": [
+    {
+      "name": "close-dispense-workspace",
+      "component": "closeDispenseWorkspace",
+      "window": "dispensing-window"
+    },
+    {
+      "name": "pause-dispense-workspace",
+      "component": "pauseDispenseWorkspace",
+      "window": "dispensing-window"
+    },
+    {
+      "name": "dispense-workspace",
+      "component": "dispenseWorkspace",
+      "window": "dispensing-window"
+    },
+    {
+      "name": "dispensing-patient-search-workspace",
+      "component": "@sihsalus/esm-patient-search-app#patientSearchWorkspace2",
+      "window": "fill-prescription-window"
+    },
+    {
+      "name": "dispensing-start-visit-workspace",
+      "component": "@sihsalus/esm-patient-chart-app#startVisitWorkspace",
+      "window": "fill-prescription-window"
+    },
+    {
+      "name": "dispensing-order-basket-workspace",
+      "component": "@sihsalus/esm-patient-orders-app#orderBasketWorkspace",
+      "window": "fill-prescription-window"
+    },
+    {
+      "name": "dispensing-order-basket-add-drug-order-workspace",
+      "component": "@sihsalus/esm-patient-medications-app#exportedAddDrugOrderWorkspace",
+      "window": "fill-prescription-window"
+    },
+    {
+      "name": "dispensing-order-basket-add-allergy-workspace",
+      "component": "@sihsalus/esm-patient-allergies-app#exportedAllergyFormWorkspace",
+      "window": "fill-prescription-window"
+    }
+  ],
+  "workspaceWindows2": [
+    {
+      "name": "dispensing-window",
+      "group": "dispensing-group"
+    },
+    {
+      "name": "fill-prescription-window",
+      "group": "dispensing-group"
+    }
+  ],
+  "workspaceGroups2": [
+    {
+      "name": "dispensing-group",
+      "overlay": true
+    }
+  ],
+  "modals": [
+    {
+      "name": "prescription-print-preview-modal",
+      "component": "printPrescriptionPreviewModal"
+    },
+    {
+      "name": "delete-confirm-modal",
+      "component": "deleteConfirmModal"
+    },
+    {
+      "name": "duplicate-dispense-modal",
+      "component": "duplicateDispenseModal"
+    },
+    {
+      "name": "on-prescription-filled-modal",
+      "component": "onPrescriptionFilledModal"
+    }
+  ]
+}

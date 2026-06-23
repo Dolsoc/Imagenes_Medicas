@@ -1,0 +1,85 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "stream",
+  "concurrency": "50%",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**",
+        "!src/**/*.test.*",
+        "!src/**/setup-tests.*",
+        "tsconfig.json",
+        "tsconfig.build.json",
+        "rspack.config.js",
+        "rspack.config.cjs",
+        "rspack.config.ts",
+        ".swcrc",
+        "postcss.config.js",
+        "translations/**",
+        "dependencies.json"
+      ],
+      "outputs": ["dist/**"],
+      "env": ["NODE_ENV", "NODE_OPTIONS", "SIHSALUS_AUTH_MODE", "SIHSALUS_FHIR_BASE"]
+    },
+    "build:development": {
+      "dependsOn": ["^build:development"],
+      "inputs": ["src/**", "!src/**/*.test.*", "tsconfig.json", "rspack.config.js", "translations/**"],
+      "outputs": ["dist/**"],
+      "env": ["NODE_ENV", "SIHSALUS_AUTH_MODE", "SIHSALUS_FHIR_BASE"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**",
+        "__mocks__/**",
+        "$TURBO_ROOT$/packages/tooling/configs/**",
+        "$TURBO_ROOT$/packages/tooling/scripts/setup-tests.ts",
+        "mock.ts",
+        "mock-vitest.ts",
+        "mock-vitest.tsx",
+        "setup-tests.ts",
+        "src/setup-tests.ts",
+        "vitest.config.ts",
+        "vitest.config.js"
+      ],
+      "env": ["TZ"],
+      "outputLogs": "errors-only"
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "coverage": {
+      "inputs": ["src/**", "__mocks__/**", "vitest.config.ts", "setup-tests.ts"],
+      "outputs": ["coverage/**"]
+    },
+    "lint": {
+      "inputs": ["src/**/*.{ts,tsx}", "$TURBO_ROOT$/biome.json"]
+    },
+    "typescript": {
+      "dependsOn": ["build", "^build", "^typescript"],
+      "inputs": ["src/**", "tsconfig.json", "tsconfig.build.json"]
+    },
+    "extract-translations": {
+      "cache": false
+    },
+    "document": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "typedoc.json", "tsconfig.typedoc.json"],
+      "outputs": ["docs/**"]
+    },
+    "e2e": {
+      "dependsOn": ["build"],
+      "outputs": ["e2e/results/**"],
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

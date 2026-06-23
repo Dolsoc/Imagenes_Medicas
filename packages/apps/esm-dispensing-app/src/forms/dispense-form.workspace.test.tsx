@@ -1,0 +1,410 @@
+import { showModal, useConfig, usePatient } from '@openmrs/esm-framework';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { saveMedicationDispense } from '../medication-dispense/medication-dispense.resource';
+import { updateMedicationRequestFulfillerStatus } from '../medication-request/medication-request.resource';
+import { type MedicationDispense, MedicationDispenseStatus, type MedicationRequestBundle } from '../types';
+import DispenseForm from './dispense-form.workspace';
+
+const mockUseConfig = vi.mocked(useConfig);
+const mockUsePatient = vi.mocked(usePatient);
+const mockShowModal = vi.mocked(showModal);
+const mockCloseWorkspace = vi.fn();
+const mockLaunchChildWorkspace = vi.fn();
+const mockSaveMedicationDispense = vi.mocked(saveMedicationDispense);
+const mockUpdateMedicationRequestFulfillerStatus = vi.mocked(updateMedicationRequestFulfillerStatus);
+
+vi.mock('../medication-dispense/medication-dispense.resource', () => ({
+  __esModule: true,
+  saveMedicationDispense: vi.fn(),
+}));
+
+vi.mock('../medication-request/medication-request.resource', () => ({
+  __esModule: true,
+  updateMedicationRequestFulfillerStatus: vi.fn(),
+}));
+
+// Mock workspace props required by Workspace2DefinitionProps
+const mockWorkspaceProps = {
+  launchChildWorkspace: mockLaunchChildWorkspace,
+  windowProps: {},
+  groupProps: {},
+  workspaceName: 'dispense-form',
+  windowName: 'dispense-form-window',
+  isRootWorkspace: true,
+  promptBeforeClosing: vi.fn(),
+  setTitle: vi.fn(),
+  showActionMenu: true,
+};
+
+// Mock the child components
+vi.mock('./medication-dispense-review.component', () => ({
+  __esModule: true,
+  default: () => <div>Medication Dispense Review</div>,
+}));
+
+vi.mock('./stock-dispense/stock-dispense.component', () => ({
+  __esModule: true,
+  default: () => <div>Stock Dispense</div>,
+}));
+
+const mockPatient = {
+  uuid: 'patient-uuid',
+  display: 'Test Patient',
+  identifiers: [],
+  person: {
+    age: 30,
+    attributes: [],
+    birthDate: '1990-01-01',
+    gender: 'M',
+    display: 'Test Patient',
+    preferredAddress: {},
+    uuid: 'patient-uuid',
+  },
+};
+
+const createMockMedicationDispense = (): MedicationDispense => ({
+  resourceType: 'MedicationDispense',
+  status: MedicationDispenseStatus.completed,
+  medicationCodeableConcept: {
+    text: 'Test Medication',
+    coding: [
+      {
+        code: 'medication-code',
+      },
+    ],
+  },
+  medicationReference: {
+    reference: 'Medication/med-uuid',
+    display: 'Test Medication',
+  },
+  subject: {
+    reference: 'Patient/patient-uuid',
+    display: 'Test Patient',
+  },
+  performer: [
+    {
+      actor: {
+        reference: 'Practitioner/prac-uuid',
+        display: 'Test Practitioner',
+      },
+    },
+  ],
+  location: {
+    reference: 'Location/loc-uuid',
+    display: 'Test Location',
+  },
+  quantity: {
+    value: 30,
+    code: '385055001',
+  },
+  dosageInstruction: [
+    {
+      timing: {
+        code: {
+          coding: [
+            {
+              code: 'timing-code',
+              display: 'Once daily',
+            },
+          ],
+        },
+      },
+      asNeededBoolean: false,
+      route: {
+        coding: [
+          {
+            code: 'route-code',
+            display: 'Oral',
+          },
+        ],
+      },
+      doseAndRate: [
+        {
+          doseQuantity: {
+            value: 1,
+            code: '385055001',
+          },
+        },
+      ],
+    },
+  ],
+  substitution: {
+    wasSubstituted: false,
+  },
+});
+
+const createMockMedicationRequestBundle = (numberOfRepeatsAllowed: number | null): MedicationRequestBundle => ({
+  request: {
+    resourceType: 'MedicationRequest',
+    id: 'request-uuid',
+    meta: {
+      lastUpdated: '2023-01-01T00:00:00.000Z',
+    },
+    status: 'active' as any,
+    intent: 'order',
+    priority: 'routine',
+    medicationReference: {
+      reference: 'Medication/med-uuid',
+      display: 'Test Medication',
+    },
+    subject: {
+      reference: 'Patient/patient-uuid',
+      display: 'Test Patient',
+    },
+    encounter: {
+      reference: 'Encounter/enc-uuid',
+      type: 'Encounter',
+    },
+    requester: {
+      reference: 'Practitioner/prac-uuid',
+      type: 'Practitioner',
+      identifier: {
+        value: 'PRAC123',
+      },
+      display: 'Test Practitioner',
+    },
+    dosageInstruction: [
+      {
+        timing: {
+          code: {
+            coding: [
+              {
+                code: 'timing-code',
+                display: 'Once daily',
+              },
+            ],
+          },
+        },
+        asNeededBoolean: false,
+        route: {
+          coding: [
+            {
+              code: 'route-code',
+              display: 'Oral',
+            },
+          ],
+        },
+        doseAndRate: [
+          {
+            doseQuantity: {
+              value: 1,
+              code: '385055001',
+            },
+          },
+        ],
+      },
+    ],
+    dispenseRequest: {
+      numberOfRepeatsAllowed: numberOfRepeatsAllowed,
+      quantity: {
+        value: 30,
+        code: '385055001',
+      },
+      validityPeriod: {
+        start: '2023-01-01',
+      },
+    },
+  },
+  dispenses: [],
+});
+
+beforeEach(() => {
+  mockShowModal.mockReturnValue(vi.fn());
+  mockSaveMedicationDispense.mockResolvedValue({ ok: true, status: 201, data: { status: 'completed' } } as any);
+  mockUpdateMedicationRequestFulfillerStatus.mockResolvedValue({} as any);
+  mockUseConfig.mockReturnValue({
+    dispenseBehavior: {
+      allowModifyingPrescription: false,
+      restrictTotalQuantityDispensed: false,
+    },
+    completeOrderWithThisDispense: true,
+    enableStockDispense: false,
+  });
+  mockUsePatient.mockReturnValue({
+    patient: mockPatient,
+    isLoading: false,
+    error: null,
+    patientUuid: 'patient-uuid',
+  } as any);
+});
+
+describe('DispenseForm - Complete Order Checkbox Auto-Default', () => {
+  test('should default checkbox to true when numberOfRepeatsAllowed is 0', () => {
+    const medicationDispense = createMockMedicationDispense();
+    const medicationRequestBundle = createMockMedicationRequestBundle(0);
+
+    render(
+      <DispenseForm
+        {...mockWorkspaceProps}
+        workspaceProps={{
+          medicationDispense,
+          medicationRequestBundle,
+          mode: 'enter',
+          patientUuid: 'patient-uuid',
+          encounterUuid: 'encounter-uuid',
+          quantityRemaining: 30,
+          quantityDispensed: 0,
+        }}
+        closeWorkspace={mockCloseWorkspace}
+      />,
+    );
+
+    const checkbox = screen.getByRole('checkbox', { name: /complete order with this dispense/i });
+    expect(checkbox).toBeChecked();
+  });
+
+  test('should default checkbox to true when numberOfRepeatsAllowed is null', () => {
+    const medicationDispense = createMockMedicationDispense();
+    const medicationRequestBundle = createMockMedicationRequestBundle(null);
+
+    render(
+      <DispenseForm
+        {...mockWorkspaceProps}
+        workspaceProps={{
+          medicationDispense,
+          medicationRequestBundle,
+          mode: 'enter',
+          patientUuid: 'patient-uuid',
+          encounterUuid: 'encounter-uuid',
+          quantityRemaining: 30,
+          quantityDispensed: 0,
+        }}
+        closeWorkspace={mockCloseWorkspace}
+      />,
+    );
+
+    const checkbox = screen.getByRole('checkbox', { name: /complete order with this dispense/i });
+    expect(checkbox).toBeChecked();
+  });
+
+  test('should default checkbox to false when numberOfRepeatsAllowed is greater than 0', () => {
+    const medicationDispense = createMockMedicationDispense();
+    const medicationRequestBundle = createMockMedicationRequestBundle(2);
+
+    render(
+      <DispenseForm
+        {...mockWorkspaceProps}
+        workspaceProps={{
+          medicationDispense,
+          medicationRequestBundle,
+          mode: 'enter',
+          patientUuid: 'patient-uuid',
+          encounterUuid: 'encounter-uuid',
+          quantityRemaining: 30,
+          quantityDispensed: 0,
+        }}
+        closeWorkspace={mockCloseWorkspace}
+      />,
+    );
+
+    const checkbox = screen.getByRole('checkbox', { name: /complete order with this dispense/i });
+    expect(checkbox).not.toBeChecked();
+  });
+
+  test('should allow user to manually uncheck the checkbox even when auto-defaulted to true', async () => {
+    const user = userEvent.setup();
+    const medicationDispense = createMockMedicationDispense();
+    const medicationRequestBundle = createMockMedicationRequestBundle(0);
+
+    render(
+      <DispenseForm
+        {...mockWorkspaceProps}
+        workspaceProps={{
+          medicationDispense,
+          medicationRequestBundle,
+          mode: 'enter',
+          patientUuid: 'patient-uuid',
+          encounterUuid: 'encounter-uuid',
+          quantityRemaining: 30,
+          quantityDispensed: 0,
+        }}
+        closeWorkspace={mockCloseWorkspace}
+      />,
+    );
+
+    const checkbox = screen.getByRole('checkbox', { name: /complete order with this dispense/i });
+    expect(checkbox).toBeChecked();
+
+    // User manually unchecks the checkbox
+    await user.click(checkbox);
+    expect(checkbox).not.toBeChecked();
+  });
+
+  test('should not auto-default checkbox in edit mode', () => {
+    const medicationDispense = createMockMedicationDispense();
+    medicationDispense.id = 'existing-dispense-id'; // Existing dispense
+    const medicationRequestBundle = createMockMedicationRequestBundle(0);
+
+    render(
+      <DispenseForm
+        {...mockWorkspaceProps}
+        workspaceProps={{
+          medicationDispense,
+          medicationRequestBundle,
+          mode: 'edit',
+          patientUuid: 'patient-uuid',
+          encounterUuid: 'encounter-uuid',
+          quantityRemaining: 30,
+          quantityDispensed: 30,
+        }}
+        closeWorkspace={mockCloseWorkspace}
+      />,
+    );
+
+    // In edit mode, the checkbox should not be rendered at all
+    const checkbox = screen.queryByRole('checkbox', { name: /complete order with this dispense/i });
+    expect(checkbox).not.toBeInTheDocument();
+  });
+
+  test('should not show duplicate warning for retrospective dispense when only later dispenses are in the lookback window', async () => {
+    const user = userEvent.setup();
+
+    const medicationDispense = {
+      ...createMockMedicationDispense(),
+      whenHandedOver: '2026-03-12T10:00:00.000Z',
+    };
+    const recentDispense = {
+      ...createMockMedicationDispense(),
+      id: 'existing-dispense-id',
+      whenHandedOver: '2026-03-26T10:00:00.000Z',
+    };
+
+    const medicationRequestBundle = {
+      ...createMockMedicationRequestBundle(0),
+      dispenses: [recentDispense],
+    };
+
+    mockUseConfig.mockReturnValue({
+      dispenseBehavior: {
+        allowModifyingPrescription: false,
+        restrictTotalQuantityDispensed: false,
+      },
+      completeOrderWithThisDispense: true,
+      enableStockDispense: false,
+      enableDuplicateDispenseCheck: true,
+      duplicateCheckWindowDays: 7,
+    } as any);
+
+    render(
+      <DispenseForm
+        {...mockWorkspaceProps}
+        workspaceProps={{
+          medicationDispense,
+          medicationRequestBundle,
+          mode: 'enter',
+          patientUuid: 'patient-uuid',
+          encounterUuid: 'encounter-uuid',
+          quantityRemaining: 30,
+          quantityDispensed: 0,
+        }}
+        closeWorkspace={mockCloseWorkspace}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', { name: /dispense prescription/i }));
+
+    expect(mockShowModal).not.toHaveBeenCalled();
+    expect(mockSaveMedicationDispense).toHaveBeenCalled();
+  });
+});

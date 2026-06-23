@@ -1,0 +1,154 @@
+import { ComboBox, Layer, Select, SelectItem } from '@carbon/react';
+import { reportError } from '@openmrs/esm-framework';
+import classNames from 'classnames';
+import { Field } from 'formik';
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { moduleName } from '../../../constants';
+import { type PersonAttributeTypeResponse } from '../../patient-registration.types';
+import { useConceptAnswers } from '../field.resource';
+import styles from './../field.scss';
+
+export interface CodedPersonAttributeFieldProps {
+  id: string;
+  personAttributeType: PersonAttributeTypeResponse;
+  answerConceptSetUuid: string;
+  label?: string;
+  customConceptAnswers: Array<{ uuid: string; label?: string }>;
+  required: boolean;
+  searchable?: boolean;
+  readOnly?: boolean;
+}
+
+export function CodedPersonAttributeField({
+  id,
+  personAttributeType,
+  answerConceptSetUuid,
+  label,
+  customConceptAnswers,
+  required,
+  searchable,
+  readOnly,
+}: CodedPersonAttributeFieldProps) {
+  const { data: conceptAnswers, isLoading: isLoadingConceptAnswers } = useConceptAnswers(
+    customConceptAnswers.length ? '' : answerConceptSetUuid,
+  );
+
+  const { t } = useTranslation(moduleName);
+  const fieldName = `attributes.${personAttributeType.uuid}`;
+  const [error, setError] = useState(false);
+  const displayLabel = label ?? personAttributeType?.display;
+  const labelText = required ? displayLabel : `${displayLabel} (${t('optional', 'optional')})`;
+
+  useEffect(() => {
+    if (!answerConceptSetUuid && !customConceptAnswers.length) {
+      reportError(
+        t(
+          'codedPersonAttributeNoAnswerSet',
+          `The person attribute field '{{codedPersonAttributeFieldId}}' is of type 'coded' but has been defined without an answer concept set UUID. The 'answerConceptSetUuid' key is required.`,
+          { codedPersonAttributeFieldId: id },
+        ),
+      );
+      setError(true);
+    }
+  }, [answerConceptSetUuid, customConceptAnswers, id, t]);
+
+  useEffect(() => {
+    if (!isLoadingConceptAnswers && !customConceptAnswers.length) {
+      if (!conceptAnswers) {
+        reportError(
+          t(
+            'codedPersonAttributeAnswerSetInvalid',
+            `The coded person attribute field '{{codedPersonAttributeFieldId}}' has been defined with an invalid answer concept set UUID '{{answerConceptSetUuid}}'.`,
+            { codedPersonAttributeFieldId: id, answerConceptSetUuid },
+          ),
+        );
+        setError(true);
+      }
+
+      if (conceptAnswers?.length === 0) {
+        reportError(
+          t(
+            'codedPersonAttributeAnswerSetEmpty',
+            `The coded person attribute field '{{codedPersonAttributeFieldId}}' has been defined with an answer concept set UUID '{{answerConceptSetUuid}}' that does not have any concept answers.`,
+            {
+              codedPersonAttributeFieldId: id,
+              answerConceptSetUuid,
+            },
+          ),
+        );
+        setError(true);
+      }
+    }
+  }, [isLoadingConceptAnswers, conceptAnswers, customConceptAnswers, t, id, answerConceptSetUuid]);
+
+  const answers = useMemo(() => {
+    if (customConceptAnswers.length) {
+      return customConceptAnswers;
+    }
+
+    return isLoadingConceptAnswers || !conceptAnswers
+      ? []
+      : conceptAnswers
+          .map((answer) => ({ ...answer, label: answer.display }))
+          .sort((a, b) => a.label.localeCompare(b.label));
+  }, [customConceptAnswers, conceptAnswers, isLoadingConceptAnswers]);
+
+  if (error) {
+    return null;
+  }
+
+  return (
+    <div
+      className={classNames(styles.customField, styles.halfWidthInDesktopView, {
+        [styles.searchableCodedField]: searchable,
+      })}
+    >
+      {!isLoadingConceptAnswers ? (
+        <Layer>
+          <Field name={fieldName}>
+            {({ field, form: { setFieldValue, touched, errors } }) => {
+              const selectedAnswer = answers.find((answer) => answer.uuid === field.value) ?? null;
+              const invalid = Boolean(errors[fieldName] && touched[fieldName]);
+
+              if (searchable) {
+                return (
+                  <ComboBox
+                    id={id}
+                    items={answers}
+                    itemToString={(answer) => answer?.label ?? ''}
+                    selectedItem={selectedAnswer}
+                    titleText={labelText}
+                    placeholder={t('searchSelectAnOption', 'Search and select an option')}
+                    invalid={invalid}
+                    disabled={readOnly}
+                    onChange={({ selectedItem }) => {
+                      setFieldValue(fieldName, selectedItem?.uuid ?? '');
+                    }}
+                  />
+                );
+              }
+
+              return (
+                <Select
+                  id={id}
+                  name={`person-attribute-${personAttributeType.uuid}`}
+                  labelText={labelText}
+                  invalid={invalid}
+                  required={required}
+                  disabled={readOnly}
+                  {...field}
+                >
+                  <SelectItem value={''} text={t('selectAnOption', 'Select an option')} />
+                  {answers.map((answer) => (
+                    <SelectItem key={answer.uuid} value={answer.uuid} text={answer.label} />
+                  ))}
+                </Select>
+              );
+            }}
+          </Field>
+        </Layer>
+      ) : null}
+    </div>
+  );
+}

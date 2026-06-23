@@ -1,0 +1,157 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.12/schema.json",
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!**/.claude",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/build",
+      "!**/*.d.ts",
+      "!**/.rspack",
+      "!**/.cache",
+      "!**/.turbo",
+      "!**/coverage",
+      "!**/form-engine-lib-runtime.js"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120,
+    "lineEnding": "lf"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noInteractiveElementToNoninteractiveRole": "error",
+        "noNoninteractiveElementToInteractiveRole": "error",
+        "noLabelWithoutControl": "off",
+        "noSvgWithoutTitle": "off",
+        "useAltText": "off",
+        "useAriaPropsForRole": "error",
+        "useButtonType": "error",
+        "useFocusableInteractive": "off",
+        "useHeadingContent": "warn",
+        "useIframeTitle": "error",
+        "useKeyWithClickEvents": "warn",
+        "useSemanticElements": "off",
+        "useValidAnchor": "warn",
+        "useValidAriaRole": "error"
+      },
+      "complexity": {
+        "noBannedTypes": "off",
+        "noForEach": "off",
+        "noStaticOnlyClass": "off",
+        "noUselessFragments": "off",
+        "noUselessRename": "off",
+        "noUselessTernary": "off",
+        "noUselessSwitchCase": "off",
+        "useArrowFunction": "off",
+        "useRegexLiterals": "off",
+        "useFlatMap": "off",
+        "useLiteralKeys": "off",
+        "useOptionalChain": "off",
+        "noCommaOperator": "warn"
+      },
+      "correctness": {
+        "noChildrenProp": "off",
+        "useExhaustiveDependencies": "error",
+        "useJsxKeyInIterable": "error"
+      },
+      "performance": {
+        "noAccumulatingSpread": "warn",
+        "noDelete": "off"
+      },
+      "security": {
+        "noGlobalEval": "error"
+      },
+      "style": {
+        "noInferrableTypes": "off",
+        "noNonNullAssertion": "warn",
+        "noParameterAssign": "off",
+        "useSingleVarDeclarator": "off",
+        "noUnusedTemplateLiteral": "off",
+        "noUselessElse": "off",
+        "useDefaultParameterLast": "off",
+        "useEnumInitializers": "off",
+        "useExportType": "off",
+        "useImportType": "off",
+        "useNodejsImportProtocol": "error",
+        "useNumberNamespace": "off",
+        "useShorthandFunctionType": "off",
+        "useSelfClosingElements": "off",
+        "useTemplate": "off"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "warn",
+        "noAssignInExpressions": "error",
+        "noConfusingVoidType": "warn",
+        "noEmptyInterface": "warn",
+        "noExplicitAny": "warn",
+        "noGlobalIsNan": "error",
+        "noImplicitAnyLet": "warn",
+        "noMisleadingCharacterClass": "error",
+        "noShorthandPropertyOverrides": "error",
+        "noShadowRestrictedNames": "error",
+        "noThenProperty": "error",
+        "noDoubleEquals": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["packages/libs/esm-styleguide/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useExhaustiveDependencies": "warn"
+          }
+        }
+      }
+    }
+  ],
+  "javascript": {
+    "globals": [
+      "CustomEvent",
+      "URL",
+      "afterAll",
+      "afterEach",
+      "atob",
+      "beforeAll",
+      "beforeEach",
+      "btoa",
+      "console",
+      "crypto",
+      "describe",
+      "document",
+      "expect",
+      "indexedDB",
+      "it",
+      "jest",
+      "module",
+      "navigator",
+      "process",
+      "require",
+      "test",
+      "TextDecoder",
+      "TextEncoder",
+      "vi",
+      "window",
+      "__dirname"
+    ],
+    "formatter": {
+      "arrowParentheses": "always",
+      "bracketSameLine": false,
+      "bracketSpacing": true,
+      "jsxQuoteStyle": "double",
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "all"
+    }
+  }
+}

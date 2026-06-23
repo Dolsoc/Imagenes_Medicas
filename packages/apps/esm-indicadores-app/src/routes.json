@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "webservices.rest": ">=2.2.0"
+  },
+  "pages": [
+    {
+      "component": "root",
+      "route": "indicators"
+    }
+  ],
+  "extensions": [
+    {
+      "name": "indicadores-app-menu-item",
+      "slot": "app-menu-item-slot",
+      "component": "indicadoresAppMenuItem",
+      "order": 60
+    }
+  ]
+}

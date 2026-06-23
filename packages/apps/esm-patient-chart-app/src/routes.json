@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json.openmrs.org/routes.schema.json",
+  "backendDependencies": {
+    "fhir2": ">=1.2"
+  },
+  "optionalBackendDependencies": {
+    "emrapi": {
+      "version": ">=2.0.0",
+      "feature": {
+        "flagName": "emrapi-module",
+        "label": "EMR API Module",
+        "description": "This module, if installed, provides core EMR business logic."
+      }
+    }
+  },
+  "extensions": [
+    {
+      "name": "charts-summary-dashboard",
+      "component": "patientSummaryDashboardLink",
+      "slot": "patient-chart-dashboard-slot",
+      "privileges": "app:clinical.chart.summary",
+      "order": 0,
+      "meta": {
+        "slot": "patient-chart-summary-dashboard-slot",
+        "path": "Patient Summary"
+      },
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "encounter-list",
+      "component": "encounterListTableTabs",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "start-visit-button",
+      "component": "startVisitActionButton",
+      "slot": "patient-actions-slot",
+      "privileges": "app:clinical.chart",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "clinical-views-summary",
+      "component": "clinicalViewsSummary",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "stop-visit-button",
+      "component": "stopVisitActionButton",
+      "slot": "patient-actions-slot",
+      "privileges": "app:clinical.chart.visits.edit",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "mark-alive-button",
+      "slot": "patient-actions-slot",
+      "component": "markPatientAliveActionButton",
+      "privileges": "app:clinical.chart.visits.edit",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "stop-visit-button-patient-search",
+      "slot": "patient-search-actions-slot",
+      "component": "stopVisitPatientSearchActionButton",
+      "privileges": "app:clinical.chart.visits.edit",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "cancel-visit-button",
+      "slot": "patient-actions-slot",
+      "component": "cancelVisitActionButton",
+      "privileges": "app:clinical.chart.visits.edit",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "cancel-visit-button",
+      "slot": "patient-search-actions-slot",
+      "component": "cancelVisitPatientSearchActionButton",
+      "privileges": "app:clinical.chart.visits.edit",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "mark-patient-deceased-button",
+      "slot": "patient-actions-slot",
+      "component": "markPatientDeceasedActionButton",
+      "privileges": "app:clinical.chart.visits.edit",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "add-past-visit-button",
+      "slot": "patient-actions-slot",
+      "component": "addPastVisitActionButton",
+      "featureFlag": "rde",
+      "privileges": "app:clinical.chart.visits.edit",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "add-past-visit-button",
+      "slot": "patient-search-actions-slot",
+      "component": "addPastVisitPatientSearchActionButton",
+      "featureFlag": "rde",
+      "privileges": "app:clinical.chart.visits.edit",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "encounters-summary-dashboard",
+      "slot": "patient-chart-dashboard-slot",
+      "component": "encountersSummaryDashboardLink",
+      "privileges": "app:clinical.chart.visits",
+      "meta": {
+        "slot": "patient-chart-encounters-dashboard-slot",
+        "path": "Visits",
+        "layoutMode": "anchored"
+      },
+      "order": 5,
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "past-visits-detail-overview",
+      "slot": "patient-chart-encounters-dashboard-slot",
+      "component": "pastVisitsDetailOverview",
+      "privileges": "app:clinical.chart.visits",
+      "order": 1,
+      "meta": {
+        "title": "Visits",
+        "view": "visits"
+      },
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "past-visits-overview",
+      "component": "pastVisitsOverview",
+      "privileges": "app:clinical.chart.visits",
+      "meta": {
+        "title": "Edit or load a past visit",
+        "view": "visits"
+      }
+    },
+    {
+      "name": "patient-details-tile",
+      "slot": "visit-form-header-slot",
+      "component": "patientDetailsTile",
+      "order": 1,
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "patient-chart-nav-group",
+      "component": "genericNavGroup",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "patient-chart-dashboard",
+      "component": "genericDashboard",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "start-visit-button-patient-search",
+      "slot": "start-visit-button-slot",
+      "component": "startVisitPatientSearchActionButton",
+      "privileges": "app:clinical.chart",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "visit-attribute-tags",
+      "slot": "patient-banner-tags-slot",
+      "component": "visitAttributeTags",
+      "online": true,
+      "offline": true
+    },
+    {
+      "name": "current-visit-summary",
+      "component": "currentVisitSummary",
+      "online": true,
+      "offline": true,
+      "meta": {
+        "fullWidth": true
+      }
+    },
+    {
+      "name": "edit-visit-action-button",
+      "slot": "visit-detail-overview-actions",
+      "component": "editVisitDetailsActionButton",
+      "privileges": "app:clinical.chart.visits.edit",
+      "online": true,
+      "offline": true,
+      "order": 0
+    },
+    {
+      "name": "delete-visit-action-button",
+      "slot": "visit-detail-overview-actions",
+      "component": "deleteVisitActionButton",
+      "privileges": "app:clinical.chart.visits.edit",
+      "online": true,
+      "offline": true,
+      "order": 1
+    },
+    {
+      "name": "active-visit-action-button",
+      "slot": "active-visit-actions",
+      "component": "activeVisitActionsComponent",
+      "privileges": "app:clinical.chart.visits.edit",
+      "online": true,
+      "offline": true,
+      "order": 1
+    }
+  ],
+  "modals": [
+    {
+      "name": "cancel-visit-dialog",
+      "component": "cancelVisitModal",
+      "privileges": "app:clinical.chart.visits.edit"
+    },
+    {
+      "name": "delete-encounter-modal",
+      "component": "deleteEncounterModal",
+      "privileges": "app:clinical.chart.visits.edit"
+    },
+    {
+      "name": "delete-visit-dialog",
+      "component": "deleteVisitModal",
+      "privileges": "app:clinical.chart.visits.edit"
+    },
+    {
+      "name": "end-visit-dialog",
+      "component": "endVisitModal",
+      "privileges": "app:clinical.chart.visits.edit"
+    },
+    {
+      "name": "mark-patient-alive-modal",
+      "component": "markPatientAliveModal",
+      "privileges": "app:clinical.chart.visits.edit"
+    },
+    {
+      "name": "modify-visit-date-dialog",
+      "component": "modifyVisitDateModal",
+      "privileges": "app:clinical.chart.visits.edit"
+    },
+    {
+      "name": "start-visit-dialog",
+      "component": "startVisitModal",
+      "privileges": "app:clinical.chart"
+    }
+  ],
+  "pages": [
+    {
+      "component": "root",
+      "routeRegex": "^patient/.+/chart",
+      "online": true,
+      "offline": true
+    }
+  ],
+  "workspaces2": [
+    {
+      "name": "start-visit-workspace-form",
+      "component": "startVisitWorkspace",
+      "window": "start-visit-workspace-window",
+      "privileges": "app:clinical.chart"
+    },
+    {
+      "name": "mark-patient-deceased-workspace-form",
+      "component": "markPatientDeceasedForm",
+      "window": "mark-patient-deceased-workspace-window",
+      "privileges": "app:clinical.chart.visits.edit"
+    }
+  ],
+  "workspaceWindows2": [
+    {
+      "name": "start-visit-workspace-window",
+      "group": "patient-chart",
+      "width": "wider"
+    },
+    {
+      "name": "mark-patient-deceased-workspace-window",
+      "group": "patient-chart",
+      "width": "wider"
+    }
+  ],
+  "workspaceGroups2": [
+    {
+      "name": "patient-chart",
+      "scopePattern": "^.*?/patient/([^/]+)/chart"
+    }
+  ]
+}

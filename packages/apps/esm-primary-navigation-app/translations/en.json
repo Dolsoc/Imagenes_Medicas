@@ -1,0 +1,17 @@
+{
+  "AppMenuTooltip": "App Menu",
+  "cancel": "Cancel",
+  "change": "Change",
+  "changeDefaultLocale": "Update your default locale",
+  "changeDefaultLocaleExplanation": "Leave this unchecked to change language for this session only",
+  "changeLanguage": "Change language",
+  "changingLanguage": "Changing language",
+  "clear": "Borrar",
+  "logout": "Logout",
+  "noPathInDashboardExtension": "Cannot render the dashboard extension without the property \"path\" being set in the configuration schema",
+  "notifications": "Notifications",
+  "searchModule": "Buscar módulo...",
+  "userMenu": "User menu",
+  "userMenuOptions": "User menu options",
+  "userMenuTooltip": "My Account"
+}

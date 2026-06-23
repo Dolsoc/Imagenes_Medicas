@@ -1,0 +1,11 @@
+/* biome-ignore-all lint/correctness/noUnknownPseudoClass: :global() is required because the app processes CSS imports as CSS Modules. */
+
+/* The project's rspack config processes all .css files as CSS Modules,
+   hashing class selectors. We use literal classNames in the JSX so the
+   selector is wrapped in :global() to keep the name un-hashed. */
+
+:global(.responsive-odontogram-svg) {
+  /* width + height set inline so the SVG follows the viewBox aspect ratio
+     and never overflows its container horizontally. */
+  max-width: 100%;
+}

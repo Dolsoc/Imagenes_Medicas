@@ -1,128 +1,16 @@
 services:
-  gateway:
-    container_name: peruHCE-gateway
-    image: openmrs/openmrs-reference-application-3-gateway:${TAG:-qa}
-    restart: "unless-stopped"
-    depends_on:
-      - frontend
-      - backend
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      FRAME_ANCESTORS: ${FRAME_ANCESTORS:-}
-      FUA_CONFIG: ${FUA_CONFIG:-}
-      FUA_LOCATIONS: ${FUA_LOCATIONS:-}
-    volumes:
-      - "/var/run/docker.sock:/tmp/docker.sock:ro"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost/" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
   frontend:
-    container_name: peruHCE-frontend
-    #image: openmrs/openmrs-reference-application-3-frontend:${TAG:-qa}
-    build:
-      context: ./frontend
-    restart: "unless-stopped"
-    environment:
-      SPA_PATH: /openmrs/spa
-      API_URL: /openmrs
-      SPA_CONFIG_URLS: /openmrs/spa/config-openmrs.json,/openmrs/spa/config-pucp.json,
-      SPA_DEFAULT_LOCALE: es
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost/" ]
-      timeout: 5s
-    depends_on:
-      - backend
-
-  backend:
-    container_name: peruHCE-backend
-    image: openmrs/openmrs-reference-application-3-backend:${TAG:-qa}
-    restart: "unless-stopped"
+    image: node:24-alpine
+    working_dir: /app
+    command: sh -c "corepack enable && yarn install --immutable --immutable-cache --check-cache && yarn build:apps && yarn assemble && yarn start"
+    volumes:
+      - .:/app
+      - /app/node_modules
     ports:
       - "8080:8080"
-    depends_on:
-      - db
+      - "8081-8090:8081-8090"
     environment:
-      OMRS_CONFIG_MODULE_WEB_ADMIN: "true"
-      OMRS_CONFIG_AUTO_UPDATE_DATABASE: "true"
-      OMRS_CONFIG_CREATE_TABLES: "true"
-      OMRS_CONFIG_CONNECTION_SERVER: db
-      OMRS_CONFIG_CONNECTION_DATABASE: openmrs
-      OMRS_CONFIG_CONNECTION_USERNAME: ${OPENMRS_DB_USER:-openmrs}
-      OMRS_CONFIG_CONNECTION_PASSWORD: ${MYSQL_OPENMRS_PASSWORD}
-      OMRS_OCL_TOKEN: ${OMRS_OCL_TOKEN}
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/openmrs/health/started" ]
-      interval: 10s
-      timeout: 5s
-      retries: 48
-      start_period: 120s
-    volumes:
-      - openmrs-data:/openmrs/data
-      - ./backend/server.xml:/usr/local/tomcat/conf/server.xml
-    build:
-      context: .
-      args:
-        GHP_USERNAME: ${GHP_USERNAME}
-        GHP_PASSWORD: ${GHP_PASSWORD}
-
-  db:
-    container_name: peruHCE-db-master
-    image: mariadb:10.11.7
-    restart: "unless-stopped"
-    command: "mariadbd --character-set-server=utf8mb3 --collation-server=utf8mb3_bin --server-id=1 --log-bin=mysql-bin --binlog-format=ROW --sync-binlog=1 --log-slave-updates=1"
-    healthcheck:
-      test: [ "CMD-SHELL", "mariadb --user=${OMRS_DB_USER:-openmrs} --password=${MYSQL_OPENMRS_PASSWORD} --execute 'SHOW DATABASES;'" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    environment:
-      MYSQL_DATABASE: openmrs
-      MYSQL_USER: ${OMRS_DB_USER:-openmrs}
-      MYSQL_PASSWORD: ${MYSQL_OPENMRS_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      OMRS_DB_REPL_USER: ${OMRS_DB_REPL_USER:-openmrs_repl}
-      OMRS_DB_REPL_PASSWORD: ${OMRS_DB_REPL_PASSWORD}
-      OMRS_DB_BACKUP_USER: ${OMRS_DB_BACKUP_USER:-openmrs_backup}
-      OMRS_DB_BACKUP_PASSWORD: ${OMRS_DB_BACKUP_PASSWORD}
-    ports:
-      - "3307:3306" # 3307 for host
-    volumes:
-      - ./scripts/database/db_init_master.sh:/docker-entrypoint-initdb.d/db_init_master.sh
-      - db-data:/var/lib/mysql
-      - db-backup:/backup
-
-volumes:
-  openmrs-data: ~
-  db-data: ~
-  db-backup: ~
-  gateway-data: ~
-  orthanc-data:
-    name: peruHCE-orthanc-data
-
-networks:
-  backend-network: 
-    name: peruHCE-backend-network
-    driver: bridge
-
-  dicom-network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.24.0.0/24
-
-  services-network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.27.0.0/24
-
-  frontend-network:
-    name: peruHCE-frontend-network
-    driver: bridge
+      - SIHSALUS_BACKEND_URL=${SIHSALUS_BACKEND_URL:-http://gidis-hsc-dev.inf.pucp.edu.pe}
+      - SIHSALUS_AUTH_MODE=openmrs
+      - SIHSALUS_INTERNAL_CLI_PORT=8081
+      - YARN_ENABLE_NETWORK=0

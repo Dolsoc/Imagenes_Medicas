@@ -1,0 +1,7 @@
+{
+  "extends": "../../tooling/tsconfig.app.json",
+  "compilerOptions": {
+    "target": "esnext"
+  },
+  "include": ["src/**/*", "../../tools/setup-tests.ts"]
+}

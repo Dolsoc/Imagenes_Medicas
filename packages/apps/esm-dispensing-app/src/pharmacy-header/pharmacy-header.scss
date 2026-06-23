@@ -1,0 +1,35 @@
+@use "@carbon/layout";
+@use "@carbon/type";
+@use "@openmrs/esm-styleguide/src/vars" as *;
+
+.header {
+  background-color: $ui-02;
+  border: 1px solid $ui-03;
+  border-left: 0;
+  display: flex;
+  justify-content: space-between;
+  padding-right: layout.$spacing-03;
+}
+
+.rightJustifiedItems {
+  @include type.type-style("body-compact-02");
+  color: $text-02;
+  display: flex;
+  align-items: center;
+  margin-top: layout.$spacing-03;
+}
+
+.dateAndLocation {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right: layout.$spacing-05;
+}
+
+.value {
+  margin-left: layout.$spacing-02;
+}
+
+.middot {
+  margin: 0 layout.$spacing-03;
+}

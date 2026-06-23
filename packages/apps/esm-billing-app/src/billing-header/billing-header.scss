@@ -1,0 +1,52 @@
+@use '@carbon/layout';
+@use '@carbon/type';
+@use '@openmrs/esm-styleguide/src/vars' as *;
+
+.header {
+  border-bottom: 1px solid $ui-03;
+}
+
+.rightJustifiedItems {
+  @include type.type-style('body-compact-02');
+  color: $text-02;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.dateAndLocation {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.userContainer {
+  display: flex;
+  justify-content: flex-end;
+  gap: layout.$spacing-05;
+}
+
+.value {
+  margin-left: layout.$spacing-02;
+}
+
+.middot {
+  margin: 0 layout.$spacing-03;
+}
+
+// Overriding styles for RTL support
+html[dir='rtl'] {
+  .dateAndLocation {
+    & > svg {
+      order: -1;
+    }
+    & > span:nth-child(2) {
+      order: -2;
+    }
+  }
+}
+
+.userIcon {
+  fill: $ui-05;
+  margin: layout.$spacing-01;
+}

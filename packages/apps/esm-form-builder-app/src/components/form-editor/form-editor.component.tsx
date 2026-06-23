@@ -1,0 +1,561 @@
+import {
+  ActionableNotification,
+  Button,
+  Column,
+  CopyButton,
+  Dropdown,
+  FileUploader,
+  Grid,
+  IconButton,
+  InlineLoading,
+  InlineNotification,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+} from '@carbon/react';
+import { ArrowLeft, Download, Maximize, Minimize } from '@carbon/react/icons';
+import { useLanguageOptions } from '@hooks/getLanguageOptionsFromSession';
+import { useClobdata } from '@hooks/useClobdata';
+import { useForm } from '@hooks/useForm';
+import { ConfigurableLink, showModal, showSnackbar, useConfig } from '@openmrs/esm-framework';
+import { handleFormValidation } from '@resources/form-validator.resource';
+import { unretireForm } from '@resources/forms.resource';
+import type { FormSchema } from '@sihsalus/esm-form-engine-lib';
+import type { Schema } from '@types';
+import classNames from 'classnames';
+import { type TFunction } from 'i18next';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { IMarker } from 'react-ace';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import type { ConfigObject } from '../../config-schema';
+import { mergeTranslatedSchema } from '../../utils/translationSchemaUtils';
+import ActionButtons from '../action-buttons/action-buttons.component';
+import AuditDetails from '../audit-details/audit-details.component';
+import FormRenderer from '../form-renderer/form-renderer.component';
+import Header from '../header/header.component';
+import InteractiveBuilder from '../interactive-builder/interactive-builder.component';
+import SchemaEditor from '../schema-editor/schema-editor.component';
+import TranslationBuilder from '../translation-builder/translation-builder.component';
+import ValidationMessage from '../validation-info/validation-info.component';
+import styles from './form-editor.scss';
+
+interface ErrorProps {
+  error: Error;
+  title: string;
+}
+
+interface TranslationFnProps {
+  t: TFunction;
+}
+
+interface MarkerProps extends IMarker {
+  text: string;
+}
+
+type Status = 'idle' | 'formLoaded' | 'schemaLoaded';
+
+function parseSchemaJson(serializedSchema: string): Schema {
+  return JSON.parse(serializedSchema) as Schema;
+}
+
+const ErrorNotification = ({ error, title }: ErrorProps) => {
+  return (
+    <InlineNotification
+      className={styles.errorNotification}
+      kind={'error'}
+      lowContrast
+      subtitle={error?.message}
+      title={title}
+    />
+  );
+};
+
+const FormEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
+  const defaultEnterDelayInMs = 300;
+  const { formUuid } = useParams<{ formUuid: string }>();
+  const { blockRenderingWithErrors, dataTypeToRenderingMap } = useConfig<ConfigObject>();
+  const isNewSchema = !formUuid;
+  const [schema, setSchema] = useState<Schema>();
+  const { form, formError, isLoadingForm, mutate: mutateForm } = useForm(formUuid);
+  const { clobdata, clobdataError, isLoadingClobdata } = useClobdata(form);
+  const [isRestoringForm, setIsRestoringForm] = useState(false);
+  const [status, setStatus] = useState<Status>('idle');
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [stringifiedSchema, setStringifiedSchema] = useState(schema ? JSON.stringify(schema, null, 2) : '');
+  const [validationResponse, setValidationResponse] = useState([]);
+  const [isValidating, setIsValidating] = useState(false);
+  const [validationComplete, setValidationComplete] = useState(false);
+  const [publishedWithErrors, setPublishedWithErrors] = useState(false);
+  const [errors, setErrors] = useState<Array<MarkerProps>>([]);
+  const [validationOn, setValidationOn] = useState(false);
+  const [invalidJsonErrorMessage, setInvalidJsonErrorMessage] = useState('');
+  const languageOptions = useLanguageOptions();
+  const [selectedLanguageCode, setSelectedLanguageCode] = useState(() => languageOptions[0]?.code ?? 'en');
+  const [shouldMergeTranslation, setShouldMergeTranslation] = useState(false);
+  const [renderLangCode, setRenderLangCode] = useState<string | null>(null);
+
+  const isLoadingFormOrSchema = Boolean(formUuid) && (isLoadingClobdata || isLoadingForm);
+
+  const langCodeForPreview = useMemo(
+    () => (shouldMergeTranslation ? renderLangCode : null),
+    [shouldMergeTranslation, renderLangCode],
+  );
+
+  const resetErrorMessage = useCallback(() => {
+    setInvalidJsonErrorMessage('');
+  }, []);
+
+  const handleSchemaChange = useCallback(
+    (updatedSchema: string) => {
+      resetErrorMessage();
+      setStringifiedSchema(updatedSchema);
+    },
+    [resetErrorMessage],
+  );
+
+  const updateSchema = useCallback((updatedSchema: Schema) => {
+    setSchema(updatedSchema);
+    localStorage.setItem('formJSON', JSON.stringify(updatedSchema));
+  }, []);
+
+  const launchRestoreDraftSchemaModal = useCallback(() => {
+    const dispose = showModal('restore-draft-schema-modal', {
+      closeModal: () => dispose(),
+      onSchemaChange: updateSchema,
+    });
+  }, [updateSchema]);
+
+  const handleRestoreForm = useCallback(async () => {
+    if (!form) {
+      return;
+    }
+
+    setIsRestoringForm(true);
+    try {
+      const res = await unretireForm(form.uuid);
+      if (res.status === 200) {
+        showSnackbar({
+          title: t('formRestored', 'Form restored'),
+          kind: 'success',
+          isLowContrast: true,
+          subtitle: t('formRestoredMessage', 'The form "{{- formName}}" has been restored', {
+            formName: form.name,
+          }),
+        });
+        await mutateForm();
+      }
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        showSnackbar({
+          title: t('errorRestoringForm', 'Error restoring form'),
+          kind: 'error',
+          subtitle: e.message,
+        });
+      }
+    } finally {
+      setIsRestoringForm(false);
+    }
+  }, [form, mutateForm, t]);
+
+  useEffect(() => {
+    if (formUuid) {
+      if (form && Object.keys(form).length > 0) {
+        setStatus('formLoaded');
+      }
+
+      if (status === 'formLoaded' && !isLoadingClobdata && clobdata === undefined) {
+        launchRestoreDraftSchemaModal();
+      }
+
+      if (clobdata && Object.keys(clobdata).length > 0) {
+        setStatus('schemaLoaded');
+        setSchema(clobdata);
+        localStorage.setItem('formJSON', JSON.stringify(clobdata));
+      }
+    }
+  }, [clobdata, form, formUuid, isLoadingClobdata, launchRestoreDraftSchemaModal, status]);
+
+  useEffect(() => {
+    setStringifiedSchema(JSON.stringify(schema, null, 2));
+  }, [schema]);
+
+  const onValidateForm = async () => {
+    setIsValidating(true);
+    try {
+      const [errorsArray] = await handleFormValidation(schema, dataTypeToRenderingMap);
+      setValidationResponse(errorsArray);
+      setValidationComplete(true);
+    } catch (error) {
+      console.error('Error during form validation:', error);
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const inputDummySchema = useCallback(() => {
+    const dummySchema: FormSchema = {
+      encounterType: '',
+      name: 'Sample Form',
+      processor: 'EncounterFormProcessor',
+      referencedForms: [],
+      uuid: '',
+      version: '1.0',
+      pages: [
+        {
+          label: 'First Page',
+          sections: [
+            {
+              label: 'A Section',
+              isExpanded: 'true',
+              questions: [
+                {
+                  id: 'sampleQuestion',
+                  label: 'A Question of type obs that renders a text input',
+                  type: 'obs',
+                  questionOptions: {
+                    rendering: 'text',
+                    concept: 'a-system-defined-concept-uuid',
+                  },
+                },
+              ],
+            },
+            {
+              label: 'Another Section',
+              isExpanded: 'true',
+              questions: [
+                {
+                  id: 'anotherSampleQuestion',
+                  label: 'Another Question of type obs whose answers get rendered as radio inputs',
+                  type: 'obs',
+                  questionOptions: {
+                    rendering: 'radio',
+                    concept: 'system-defined-concept-uuid',
+                    answers: [
+                      {
+                        concept: 'another-system-defined-concept-uuid',
+                        label: 'Choice 1',
+                      },
+                      {
+                        concept: 'yet-another-system-defined-concept-uuid',
+                        label: 'Choice 2',
+                      },
+                      {
+                        concept: 'yet-one-more-system-defined-concept-uuid',
+                        label: 'Choice 3',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    setStringifiedSchema(JSON.stringify(dummySchema, null, 2));
+    updateSchema({ ...dummySchema });
+  }, [updateSchema]);
+
+  const renderSchemaChanges = useCallback(() => {
+    resetErrorMessage();
+    try {
+      const parsedJson = parseSchemaJson(stringifiedSchema);
+      updateSchema(parsedJson);
+      setStringifiedSchema(JSON.stringify(parsedJson, null, 2));
+    } catch (e) {
+      if (e instanceof Error) {
+        setInvalidJsonErrorMessage(e.message);
+      }
+    }
+  }, [stringifiedSchema, updateSchema, resetErrorMessage]);
+
+  const translatedSchema = useMemo(() => {
+    if (!schema) return null;
+    if (!shouldMergeTranslation) return schema;
+    return mergeTranslatedSchema(schema, langCodeForPreview);
+  }, [schema, shouldMergeTranslation, langCodeForPreview]);
+
+  const previewSchema = useMemo<FormSchema | null>(() => {
+    if (!translatedSchema) {
+      return null;
+    }
+
+    const translations = translatedSchema.translations;
+    if (!translations || Object.values(translations).every((value) => typeof value === 'string')) {
+      return translatedSchema as FormSchema;
+    }
+
+    const { translations: _translations, ...rest } = translatedSchema;
+    return rest as FormSchema;
+  }, [translatedSchema]);
+
+  const handleRenderSchemaChanges = useCallback(() => {
+    if (errors.length && blockRenderingWithErrors) {
+      setValidationOn(true);
+      return;
+    }
+
+    setShouldMergeTranslation(true);
+    setRenderLangCode(selectedLanguageCode);
+    if (errors.length && !blockRenderingWithErrors) {
+      setValidationOn(true);
+      renderSchemaChanges();
+    } else {
+      renderSchemaChanges();
+    }
+  }, [blockRenderingWithErrors, errors.length, renderSchemaChanges, selectedLanguageCode]);
+
+  const handleSchemaImport = (
+    event: React.SyntheticEvent<HTMLElement>,
+    data?: { addedFiles: Array<{ file: File }> },
+  ) => {
+    const file =
+      data?.addedFiles[0]?.file ?? (event.target instanceof HTMLInputElement ? event.target.files?.item(0) : undefined);
+
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const result = e.target?.result;
+      if (typeof result === 'string') {
+        const fileContent: string = result;
+        const parsedJson = parseSchemaJson(fileContent);
+        setSchema(parsedJson);
+      } else if (result instanceof ArrayBuffer) {
+        const decoder = new TextDecoder();
+        const fileContent: string = decoder.decode(result);
+        const parsedJson = parseSchemaJson(fileContent);
+        setSchema(parsedJson);
+      }
+    };
+
+    reader.readAsText(file);
+  };
+
+  const downloadableSchema = useMemo(
+    () =>
+      new Blob([JSON.stringify(schema, null, 2)], {
+        type: 'application/json',
+      }),
+    [schema],
+  );
+
+  const handleCopySchema = useCallback(async () => {
+    await navigator.clipboard.writeText(stringifiedSchema);
+  }, [stringifiedSchema]);
+
+  const handleToggleMaximize = () => {
+    setIsMaximized(!isMaximized);
+  };
+
+  const responsiveSize = isMaximized ? 16 : 8;
+
+  return (
+    <div className={styles.container}>
+      {form?.retired && (
+        <ActionableNotification
+          className={styles.retiredNotification}
+          kind="warning"
+          lowContrast
+          inline
+          hideCloseButton
+          title={t('formIsRetired', 'This form is retired.')}
+          actionButtonLabel={isRestoringForm ? t('restoring', 'Restoring') : t('restoreForm', 'Restore form')}
+          onActionButtonClick={handleRestoreForm}
+        />
+      )}
+      <Grid
+        className={classNames(styles.grid, {
+          [styles.maximized]: isMaximized,
+        })}
+      >
+        <Column lg={responsiveSize} md={responsiveSize} sm={4} className={styles.column}>
+          <div className={styles.actionButtons}>
+            {isLoadingFormOrSchema ? (
+              <InlineLoading description={t('loadingSchema', 'Loading schema') + '...'} />
+            ) : (
+              <h1 className={styles.formName}>{form?.name}</h1>
+            )}
+          </div>
+          <div>
+            <div className={styles.heading}>
+              <span className={styles.tabHeading}>{t('schemaEditor', 'Schema editor')}</span>
+              <div className={styles.topBtns}>
+                {!schema ? (
+                  <FileUploader
+                    onChange={handleSchemaImport}
+                    labelTitle=""
+                    labelDescription=""
+                    buttonLabel={t('importSchema', 'Import schema')}
+                    buttonKind="ghost"
+                    size="lg"
+                    filenameStatus="edit"
+                    accept={['.json']}
+                    multiple={false}
+                    disabled={false}
+                    iconDescription={t('importSchema', 'Import schema')}
+                    name="form-import"
+                  />
+                ) : null}
+                {isNewSchema && !schema ? (
+                  <Button kind="ghost" onClick={inputDummySchema}>
+                    {t('inputDummySchema', 'Input dummy schema')}
+                  </Button>
+                ) : null}
+                <Dropdown
+                  id="target-language"
+                  items={languageOptions}
+                  itemToString={(item) => item?.label ?? ''}
+                  label={t('selectLanguage', 'Select language')}
+                  onChange={({ selectedItem }) => {
+                    if (selectedItem) setSelectedLanguageCode(selectedItem.code);
+                  }}
+                  titleText={t('previewFormIn', 'Preview form in')}
+                  selectedItem={languageOptions.find((opt) => opt.code === selectedLanguageCode)}
+                  type="inline"
+                  className={styles.dropdown}
+                />
+
+                <Button kind="ghost" onClick={handleRenderSchemaChanges} disabled={!!invalidJsonErrorMessage}>
+                  <span>{t('renderChanges', 'Render changes')}</span>
+                </Button>
+              </div>
+              {schema ? (
+                <>
+                  <IconButton
+                    enterDelayMs={defaultEnterDelayInMs}
+                    kind="ghost"
+                    label={
+                      isMaximized ? t('minimizeEditor', 'Minimize editor') : t('maximizeEditor', 'Maximize editor')
+                    }
+                    onClick={handleToggleMaximize}
+                    size="md"
+                  >
+                    {isMaximized ? <Minimize /> : <Maximize />}
+                  </IconButton>
+                  <CopyButton
+                    align="top"
+                    className="cds--btn--md"
+                    iconDescription={t('copySchema', 'Copy schema')}
+                    kind="ghost"
+                    onClick={() => {
+                      void handleCopySchema();
+                    }}
+                  />
+                  <a download={`${form?.name}.json`} href={globalThis.URL.createObjectURL(downloadableSchema)}>
+                    <IconButton
+                      enterDelayMs={defaultEnterDelayInMs}
+                      kind="ghost"
+                      label={t('downloadSchema', 'Download schema')}
+                      size="md"
+                    >
+                      <Download />
+                    </IconButton>
+                  </a>
+                </>
+              ) : null}
+            </div>
+            {formError ? (
+              <ErrorNotification error={formError} title={t('formError', 'Error loading form metadata')} />
+            ) : null}
+            {clobdataError ? (
+              <ErrorNotification error={clobdataError} title={t('schemaLoadError', 'Error loading schema')} />
+            ) : null}
+            <div className={styles.editorContainer}>
+              <SchemaEditor
+                errors={errors}
+                isLoading={isLoadingFormOrSchema}
+                onSchemaChange={handleSchemaChange}
+                setErrors={setErrors}
+                setValidationOn={setValidationOn}
+                stringifiedSchema={stringifiedSchema}
+                validationOn={validationOn}
+              />
+            </div>
+          </div>
+        </Column>
+        <Column lg={8} md={8} sm={4} className={styles.column}>
+          <ActionButtons
+            schema={schema}
+            t={t}
+            schemaErrors={errors}
+            setPublishedWithErrors={setPublishedWithErrors}
+            onFormValidation={onValidateForm}
+            setValidationResponse={setValidationResponse}
+            setValidationComplete={setValidationComplete}
+            isValidating={isValidating}
+          />
+          {validationComplete && (
+            <ValidationMessage
+              hasValidationErrors={validationResponse.length > 0}
+              publishedWithErrors={publishedWithErrors}
+              errorsCount={validationResponse.length}
+            />
+          )}
+          <Tabs>
+            <TabList aria-label="Form previews">
+              <Tab>{t('preview', 'Preview')}</Tab>
+              <Tab>{t('interactiveBuilder', 'Interactive Builder')}</Tab>
+              <Tab>{t('translationBuilder', 'Translation Builder')}</Tab>
+              {form && <Tab>{t('auditDetails', 'Audit Details')}</Tab>}
+            </TabList>
+            <TabPanels>
+              <TabPanel>
+                <FormRenderer schema={previewSchema} isLoading={isLoadingFormOrSchema} />
+              </TabPanel>
+              <TabPanel>
+                <InteractiveBuilder
+                  schema={schema}
+                  onSchemaChange={updateSchema}
+                  isLoading={isLoadingFormOrSchema}
+                  validationResponse={validationResponse}
+                />
+              </TabPanel>
+              <TabPanel>
+                <TranslationBuilder formSchema={schema} onUpdateSchema={updateSchema} />
+              </TabPanel>
+              <TabPanel>{form && <AuditDetails form={form} key={form.uuid} />}</TabPanel>
+            </TabPanels>
+          </Tabs>
+        </Column>
+      </Grid>
+    </div>
+  );
+};
+
+function BackButton({ t }: TranslationFnProps) {
+  return (
+    <div className={styles.backButton}>
+      <ConfigurableLink to={`${globalThis.spaBase}/form-builder`}>
+        <Button
+          kind="ghost"
+          renderIcon={(props) => <ArrowLeft size={24} {...props} />}
+          iconDescription={t('returnToDashboard', 'Return to dashboard')}
+        >
+          <span>{t('backToDashboard', 'Back to dashboard')}</span>
+        </Button>
+      </ConfigurableLink>
+    </div>
+  );
+}
+
+function FormEditor() {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      <Header title={t('schemaEditor', 'Schema editor')} />
+      <BackButton t={t} />
+      <FormEditorContent t={t} />
+    </>
+  );
+}
+
+export default FormEditor;
