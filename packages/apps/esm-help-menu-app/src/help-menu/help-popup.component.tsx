@@ -1,4 +1,5 @@
 import { ExtensionSlot } from '@openmrs/esm-framework';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './help-popup.styles.scss';
